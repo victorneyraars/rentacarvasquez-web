@@ -1,0 +1,24 @@
+services:
+  rentacar-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rentacarvasquez_web
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - baqueano_net
+
+networks:
+  baqueano_net:
+    external: true
+    name: baqueano-natales_baqueano_net

@@ -1,4 +1,5 @@
 import VehiculoCard from "@/components/VehiculoCard";
+import { FAQ } from "@/components/FAQ";
 import { getVehiculosDelPrestador, PRESTADOR } from "@/lib/api";
 
 export const revalidate = 30;
@@ -82,6 +83,8 @@ export default async function Home() {
       </section>
 
       {/* FOOTER */}
+      <FAQ />
+
       <footer className="bg-slate-900 py-12 text-slate-300">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-8 md:grid-cols-3">

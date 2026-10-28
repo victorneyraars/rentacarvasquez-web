@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { getVehiculo, PRESTADOR, formatCLP } from "@/lib/api";
+import { SITE } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
+import { buildVehicleSchema, buildBreadcrumbSchema } from "@/lib/json-ld";
 import ReservaForm from "@/components/ReservaForm";
 
 export const revalidate = 30;
@@ -17,6 +21,26 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const vehiculo = await getVehiculo(id);
+  if (!vehiculo) {
+    return { title: "Vehiculo no encontrado" };
+  }
+  const img = vehiculo.imagen_url || CATEGORIA_IMAGEN[vehiculo.categoria] || DEFAULT_IMG;
+  return {
+    title: "Arrendar " + vehiculo.marca + " " + vehiculo.modelo + " " + vehiculo.anio + " en Puerto Natales",
+    description: "Arriendo de " + vehiculo.marca + " " + vehiculo.modelo + " " + vehiculo.anio + " (" + vehiculo.categoria + ") en Puerto Natales. Precio " + formatCLP(vehiculo.precio_dia) + " por dia.",
+    alternates: { canonical: SITE.url + "/vehiculos/" + vehiculo.id },
+    openGraph: {
+      type: "website",
+      title: vehiculo.marca + " " + vehiculo.modelo + " " + vehiculo.anio + " | Rent a Car Vasquez",
+      description: "Arriendo " + vehiculo.categoria + " en Puerto Natales desde " + formatCLP(vehiculo.precio_dia) + "/dia.",
+      images: [{ url: img, width: 1200, height: 630, alt: vehiculo.marca + " " + vehiculo.modelo }],
+    },
+  };
+}
+
 export default async function VehiculoDetalle({ params }: PageProps) {
   const { id } = await params;
   const vehiculo = await getVehiculo(id);
@@ -29,6 +53,20 @@ export default async function VehiculoDetalle({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-slate-50">
+      <JsonLd data={buildVehicleSchema({
+        id: vehiculo.id,
+        marca: vehiculo.marca,
+        modelo: vehiculo.modelo,
+        anio: vehiculo.anio,
+        categoria: vehiculo.categoria,
+        precioDia: vehiculo.precio_dia,
+        imagenUrl: vehiculo.imagen_url,
+        disponible: vehiculo.disponible,
+      })} />
+      <JsonLd data={buildBreadcrumbSchema([
+        { name: "Inicio", url: SITE.url },
+        { name: vehiculo.marca + " " + vehiculo.modelo, url: SITE.url + "/vehiculos/" + vehiculo.id },
+      ])} />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Link
           href="/"

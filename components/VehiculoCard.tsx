@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Vehiculo } from "@/lib/types";
 import { formatCLP } from "@/lib/api";
 
@@ -31,12 +32,13 @@ export default function VehiculoCard({ vehiculo, index = 0 }: Props) {
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="relative h-52 overflow-hidden bg-slate-100">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={img}
           alt={`${vehiculo.marca} ${vehiculo.modelo}`}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-          loading="lazy"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          priority={index === 0}
         />
         <span className="absolute left-3 top-3 rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white shadow-lg">
           {vehiculo.categoria}

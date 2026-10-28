@@ -1,12 +1,36 @@
+import { Suspense } from "react";
 import VehiculoCard from "@/components/VehiculoCard";
 import { FAQ } from "@/components/FAQ";
 import { getVehiculosDelPrestador, PRESTADOR } from "@/lib/api";
 
 export const revalidate = 30;
 
-export default async function Home() {
+async function FlotaSection() {
   const vehiculos = await getVehiculosDelPrestador();
+  return (
+    <section id="flota" className="mx-auto max-w-7xl px-6 py-20">
+      <div className="mb-12 text-center">
+        <h2 className="text-4xl font-extrabold text-slate-900">Nuestra Flota</h2>
+        <p className="mt-3 text-lg text-slate-600">
+          {vehiculos.length} vehiculos disponibles para tu proxima aventura
+        </p>
+      </div>
+      {vehiculos.length === 0 ? (
+        <div className="rounded-2xl border-2 border-dashed border-slate-300 py-20 text-center">
+          <p className="text-lg text-slate-500">No hay vehiculos disponibles en este momento.</p>
+        </div>
+      ) : (
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {vehiculos.map((v, i) => (
+            <VehiculoCard key={v.id} vehiculo={v} index={i} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
 
+export default async function Home() {
   return (
     <main className="min-h-screen bg-slate-50">
       {/* HERO */}
@@ -58,29 +82,22 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* CATALOGO */}
-      <section id="flota" className="mx-auto max-w-7xl px-6 py-20">
-        <div className="mb-12 text-center">
-          <h2 className="text-4xl font-extrabold text-slate-900">Nuestra Flota</h2>
-          <p className="mt-3 text-lg text-slate-600">
-            {vehiculos.length} vehiculos disponibles para tu proxima aventura
-          </p>
-        </div>
-
-        {vehiculos.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-slate-300 py-20 text-center">
-            <p className="text-lg text-slate-500">
-              No hay vehiculos disponibles en este momento.
-            </p>
+      {/* CATALOGO con Suspense para no bloquear el hero */}
+      <Suspense fallback={
+        <section id="flota" className="mx-auto max-w-7xl px-6 py-20">
+          <div className="mb-12 text-center">
+            <h2 className="text-4xl font-extrabold text-slate-900">Nuestra Flota</h2>
+            <p className="mt-3 text-lg text-slate-600">Cargando vehiculos...</p>
           </div>
-        ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {vehiculos.map((v, i) => (
-              <VehiculoCard key={v.id} vehiculo={v} index={i} />
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-80 animate-pulse rounded-2xl bg-slate-200" />
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      }>
+        <FlotaSection />
+      </Suspense>
 
       {/* FOOTER */}
       <FAQ />

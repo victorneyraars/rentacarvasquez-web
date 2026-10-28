@@ -5,7 +5,13 @@ import { SITE } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 import { buildAutoRentalSchema, buildWebSiteSchema } from "@/lib/json-ld";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  preload: true,
+  adjustFontFallback: true,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),

@@ -1,0 +1,19 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: victorneyraars/baqueano-natales/.github/workflows/deploy-docker.yml@c3d8f89baa9fcfb0408bbbdc5d50e955282bae7f
+    with:
+      deploy-path: /home/deploy/rentacarvasquez-web
+      compose-file: docker-compose.rentacar.yml
+      healthcheck-url: https://rentacarvasquez.com/
+      branch: main
+    secrets:
+      SSH_HOST: ${{ secrets.SERVER_HOST }}
+      SSH_USER: ${{ secrets.SERVER_USER }}
+      SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}

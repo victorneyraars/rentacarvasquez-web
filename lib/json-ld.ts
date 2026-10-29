@@ -1,58 +1,14 @@
 // JSON-LD schemas para SEO. Reutilizable y mantenible.
 import { SITE, ORGANIZATION_ID, WEBSITE_ID } from "./seo";
+import type { PerfilCompleto } from "./types";
+import { toAutoRentalSchema } from "./perfil-utils";
 
-export function buildAutoRentalSchema() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "AutoRental",
-    "@id": ORGANIZATION_ID,
-    name: SITE.name,
-    url: SITE.url,
-    telephone: SITE.telephone,
-    email: SITE.email,
-    priceRange: SITE.priceRange,
-    image: SITE.url + "/og-image.png",
-    logo: SITE.logoUrl,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: SITE.street + " " + SITE.streetNumber,
-      addressLocality: SITE.city,
-      addressRegion: SITE.region,
-      postalCode: SITE.postalCode,
-      addressCountry: SITE.country,
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: SITE.lat,
-      longitude: SITE.lng,
-    },
-    areaServed: {
-      "@type": "GeoCircle",
-      geoMidpoint: {
-        "@type": "GeoCoordinates",
-        latitude: SITE.lat,
-        longitude: SITE.lng,
-      },
-      geoRadius: SITE.areaRadiusKm * 1000,
-    },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
-        ],
-        opens: "08:00",
-        closes: "22:00",
-      },
-    ],
-    sameAs: [SITE.instagram, SITE.facebook].filter((x) => x && x.length > 0),
-  };
+export function buildAutoRentalSchema(
+  perfil?: PerfilCompleto | null,
+) {
+  // Delega al helper que usa datos reales del endpoint /perfil-completo
+  // con fallback a SITE si el perfil es null.
+  return toAutoRentalSchema(perfil ?? null);
 }
 
 export function buildWebSiteSchema() {

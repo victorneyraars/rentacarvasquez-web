@@ -1,12 +1,16 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/seo";
+import { getPerfilCompleto } from "@/lib/api";
+import { toSiteMetadata } from "@/lib/perfil-utils";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const perfil = await getPerfilCompleto();
+  const meta = toSiteMetadata(perfil);
+
   return {
-    name: SITE.name + " - Arriendo de Vehiculos",
-    short_name: SITE.name,
-    description:
-      "Arriendo de vehiculos en " + SITE.city + ". Flota renovada, seguro incluido.",
+    name: meta.name + " - Arriendo de Vehiculos",
+    short_name: meta.name,
+    description: meta.description,
     start_url: "/",
     display: "standalone",
     background_color: "#F8F7F5",

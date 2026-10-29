@@ -75,3 +75,33 @@ export async function createReserva(
   }
   return res.json() as Promise<ReservaResponse>;
 }
+
+// =========================================================
+// Perfil completo (fuente única de verdad para NAP/JSON-LD)
+// =========================================================
+import type { PerfilCompleto } from './types';
+
+/**
+ * Obtiene el perfil completo del prestador desde el backend.
+ *
+ * Es la fuente única de verdad para:
+ * - NAP (Name, Address, Phone) consistente con GBP
+ * - JSON-LD AutoRental completo
+ * - Metadata de Open Graph
+ * - Manifest PWA
+ *
+ * Si el endpoint falla (500, timeout, red), retorna null.
+ * Los consumidores deben usar fallback a `SITE` o `PRESTADOR`.
+ */
+export async function getPerfilCompleto(): Promise<PerfilCompleto | null> {
+  const slug = PRESTADOR.slug;
+  if (!slug) return null;
+  try {
+    return await fetchJson<PerfilCompleto>(
+      `/api/v1/prestadores/${slug}/perfil-completo`,
+    );
+  } catch (e) {
+    console.error('[getPerfilCompleto] fallo, usando fallback:', e);
+    return null;
+  }
+}

@@ -6,11 +6,13 @@ import { formatCLP, createReserva } from "@/lib/api";
 
 interface Props {
   vehiculo: Vehiculo;
+  inicioInicial?: string;
+  finInicial?: string;
 }
 
-export default function ReservaForm({ vehiculo }: Props) {
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaFin, setFechaFin] = useState("");
+export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Props) {
+  const [fechaInicio, setFechaInicio] = useState(inicioInicial ?? "");
+  const [fechaFin, setFechaFin] = useState(finInicial ?? "");
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");

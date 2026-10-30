@@ -21,6 +21,7 @@ const DEFAULT_IMG = "https://images.unsplash.com/photo-1494976388531-d1058494cdd
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ inicio?: string; fin?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -43,8 +44,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function VehiculoDetalle({ params }: PageProps) {
+export default async function VehiculoDetalle({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const sp = await searchParams;
+  const inicio = typeof sp.inicio === 'string' ? sp.inicio : undefined;
+  const fin = typeof sp.fin === 'string' ? sp.fin : undefined;
   const vehiculo = await getVehiculo(id);
   if (!vehiculo) notFound();
   const wa = await getWhatsAppInfo();
@@ -135,7 +139,7 @@ export default async function VehiculoDetalle({ params }: PageProps) {
 
         <div className="md:col-span-2">
           <div className="md:sticky md:top-6">
-            <ReservaForm vehiculo={vehiculo} />
+            <ReservaForm vehiculo={vehiculo} inicioInicial={inicio} finInicial={fin} />
               <div className="mt-4 rounded-2xl bg-white p-4 text-center shadow-sm">
                 <p className="mb-3 text-sm text-slate-600">Preferis coordinar por WhatsApp?</p>
                 <WhatsAppButton info={wa} context="vehiculo" vars={{ marca: vehiculo.marca, modelo: vehiculo.modelo, patente: vehiculo.patente, sitio: "rentacarvasquez.com" }} variant="primary" size="md" label="Consultar por WhatsApp" className="w-full" />

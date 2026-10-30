@@ -5,6 +5,8 @@ import { getVehiculosDelPrestador, PRESTADOR } from "@/lib/api";
 import { getWhatsAppInfo } from "@/lib/whatsapp-server";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import WhatsAppFloating from "@/components/WhatsAppFloating";
+import TransparenciaBlock from "@/components/TransparenciaBlock";
+import { getTransparencia } from "@/lib/transparencia-server";
 
 export const revalidate = 30;
 
@@ -35,6 +37,7 @@ async function FlotaSection() {
 
 export default async function Home() {
   const wa = await getWhatsAppInfo();
+  const transparencia = await getTransparencia();
   return (
     <main className="min-h-screen bg-slate-50">
       {/* HERO */}
@@ -77,6 +80,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* TRANSPARENCIA — configurable por el prestador */}
+      {transparencia && <TransparenciaBlock transparencia={transparencia} />}
 
       {/* FEATURES */}
       <section className="border-b border-slate-200 bg-white py-12">

@@ -200,8 +200,21 @@ export function toAutoRentalSchema(perfil: PerfilCompleto | null) {
   const redes = perfil?.perfil_negocio?.redes;
   const ig = redes?.instagram ?? SITE.instagram;
   const fb = redes?.facebook ?? SITE.facebook;
+  // Triple fallback del logo:
+  // 1. Lo que configuro el usuario en el form (fotos.logo_512)
+  // 2. El endpoint publico del brand kit (si hay brand_kit_slug)
+  // 3. El logo.png local de la web
+  const brandKitSlug = perfil?.brand_kit_slug;
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ??
+    'https://api-dev.baqueanonatales.com';
+  const brandKitLogo = brandKitSlug
+    ? `${apiUrl}/api/v1/public/brand/${brandKitSlug}/logo.png?size=512`
+    : null;
   const logo =
-    perfil?.perfil_negocio?.fotos?.logo_512 ?? SITE.logoUrl;
+    perfil?.perfil_negocio?.fotos?.logo_512 ??
+    brandKitLogo ??
+    SITE.logoUrl;
   const image =
     perfil?.perfil_negocio?.fotos?.portada ??
     SITE.url + "/og-image.png";

@@ -2,6 +2,9 @@ import { Suspense } from "react";
 import VehiculoCard from "@/components/VehiculoCard";
 import { FAQ } from "@/components/FAQ";
 import { getVehiculosDelPrestador, PRESTADOR } from "@/lib/api";
+import { getWhatsAppInfo } from "@/lib/whatsapp-server";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import WhatsAppFloating from "@/components/WhatsAppFloating";
 
 export const revalidate = 30;
 
@@ -31,6 +34,7 @@ async function FlotaSection() {
 }
 
 export default async function Home() {
+  const wa = await getWhatsAppInfo();
   return (
     <main className="min-h-screen bg-slate-50">
       {/* HERO */}
@@ -60,6 +64,15 @@ export default async function Home() {
               >
                 📞 Llamar
               </a>
+              <WhatsAppButton
+                info={wa}
+                context="home"
+                vars={{ sitio: "rentacarvasquez.com" }}
+                variant="primary"
+                size="lg"
+                label="WhatsApp"
+                className="shadow-xl"
+              />
             </div>
           </div>
         </div>
@@ -126,6 +139,7 @@ export default async function Home() {
           </div>
         </div>
       </footer>
+      <WhatsAppFloating info={wa} context="home" vars={{ sitio: "rentacarvasquez.com" }} />
     </main>
   );
 }

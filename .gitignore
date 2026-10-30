@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Previews locales de iteracion de brand (no commitear)
+public/_preview/

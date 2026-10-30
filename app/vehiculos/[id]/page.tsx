@@ -6,6 +6,8 @@ import { SITE } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 import { buildVehicleSchema, buildBreadcrumbSchema } from "@/lib/json-ld";
 import ReservaForm from "@/components/ReservaForm";
+import { getWhatsAppInfo } from "@/lib/whatsapp-server";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 export const revalidate = 30;
 
@@ -45,6 +47,7 @@ export default async function VehiculoDetalle({ params }: PageProps) {
   const { id } = await params;
   const vehiculo = await getVehiculo(id);
   if (!vehiculo) notFound();
+  const wa = await getWhatsAppInfo();
 
   const img =
     vehiculo.imagen_url ||
@@ -133,6 +136,10 @@ export default async function VehiculoDetalle({ params }: PageProps) {
         <div className="md:col-span-2">
           <div className="md:sticky md:top-6">
             <ReservaForm vehiculo={vehiculo} />
+              <div className="mt-4 rounded-2xl bg-white p-4 text-center shadow-sm">
+                <p className="mb-3 text-sm text-slate-600">Preferis coordinar por WhatsApp?</p>
+                <WhatsAppButton info={wa} context="vehiculo" vars={{ marca: vehiculo.marca, modelo: vehiculo.modelo, patente: vehiculo.patente, sitio: "rentacarvasquez.com" }} variant="primary" size="md" label="Consultar por WhatsApp" className="w-full" />
+              </div>
           </div>
         </div>
       </section>

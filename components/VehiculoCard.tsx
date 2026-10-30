@@ -6,6 +6,8 @@ import { formatCLP } from "@/lib/api";
 interface Props {
   vehiculo: Vehiculo;
   index?: number;
+  inicio?: string;
+  fin?: string;
 }
 
 // Imagen de placeholder por categoría (hasta que Vásquez suba fotos reales)
@@ -19,7 +21,7 @@ const CATEGORIA_IMAGEN: Record<string, string> = {
 const DEFAULT_IMG =
   "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=80";
 
-export default function VehiculoCard({ vehiculo, index = 0 }: Props) {
+export default function VehiculoCard({ vehiculo, index = 0, inicio, fin }: Props) {
   const img =
     vehiculo.imagen_url ||
     CATEGORIA_IMAGEN[vehiculo.categoria] ||
@@ -27,7 +29,7 @@ export default function VehiculoCard({ vehiculo, index = 0 }: Props) {
 
   return (
     <Link
-      href={`/vehiculos/${vehiculo.id}`}
+      href={`/vehiculos/${vehiculo.id}${inicio && fin ? `?inicio=${inicio}&fin=${fin}` : ""}`}
       className="group card-hover block overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-slate-200/50"
       style={{ animationDelay: `${index * 80}ms` }}
     >

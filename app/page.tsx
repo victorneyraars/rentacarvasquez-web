@@ -6,11 +6,12 @@ import { getWhatsAppInfo } from "@/lib/whatsapp-server";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import WhatsAppFloating from "@/components/WhatsAppFloating";
 import TransparenciaBlock from "@/components/TransparenciaBlock";
+import HeroSearch from "@/components/HeroSearch";
 import { getTransparencia } from "@/lib/transparencia-server";
 
 export const revalidate = 30;
 
-async function FlotaSection() {
+async function FlotaSection({ inicio, fin }: { inicio?: string; fin?: string }) {
   const vehiculos = await getVehiculosDelPrestador();
   return (
     <section id="flota" className="mx-auto max-w-7xl px-6 py-20">
@@ -20,6 +21,16 @@ async function FlotaSection() {
           {vehiculos.length} vehiculos disponibles para tu proxima aventura
         </p>
       </div>
+      {inicio && fin && (
+
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-800">
+
+          📅 Mostrando autos disponibles del {inicio} al {fin}
+
+        </div>
+
+      )}
+
       {vehiculos.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-300 py-20 text-center">
           <p className="text-lg text-slate-500">No hay vehiculos disponibles en este momento.</p>
@@ -27,7 +38,7 @@ async function FlotaSection() {
       ) : (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {vehiculos.map((v, i) => (
-            <VehiculoCard key={v.id} vehiculo={v} index={i} />
+            <VehiculoCard key={v.id} vehiculo={v} index={i} inicio={inicio} fin={fin} />
           ))}
         </div>
       )}
@@ -35,7 +46,14 @@ async function FlotaSection() {
   );
 }
 
-export default async function Home() {
+interface HomeProps {
+  searchParams: Promise<{ inicio?: string; fin?: string }>;
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const sp = await searchParams;
+  const inicio = typeof sp.inicio === 'string' ? sp.inicio : undefined;
+  const fin = typeof sp.fin === 'string' ? sp.fin : undefined;
   const wa = await getWhatsAppInfo();
   const transparencia = await getTransparencia();
   return (
@@ -77,6 +95,9 @@ export default async function Home() {
                 className="shadow-xl"
               />
             </div>
+          <div className="max-w-3xl">
+            <HeroSearch />
+          </div>
           </div>
         </div>
       </section>
@@ -115,7 +136,7 @@ export default async function Home() {
           </div>
         </section>
       }>
-        <FlotaSection />
+        <FlotaSection inicio={inicio} fin={fin} />
       </Suspense>
 
       {/* FOOTER */}

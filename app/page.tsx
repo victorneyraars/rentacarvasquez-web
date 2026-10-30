@@ -11,7 +11,7 @@ import { getTransparencia } from "@/lib/transparencia-server";
 
 export const revalidate = 30;
 
-async function FlotaSection({ inicio, fin }: { inicio?: string; fin?: string }) {
+async function FlotaSection() {
   const vehiculos = await getVehiculosDelPrestador();
   return (
     <section id="flota" className="mx-auto max-w-7xl px-6 py-20">
@@ -21,15 +21,6 @@ async function FlotaSection({ inicio, fin }: { inicio?: string; fin?: string }) 
           {vehiculos.length} vehiculos disponibles para tu proxima aventura
         </p>
       </div>
-      {inicio && fin && (
-
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-800">
-
-          📅 Mostrando autos disponibles del {inicio} al {fin}
-
-        </div>
-
-      )}
 
       {vehiculos.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-300 py-20 text-center">
@@ -38,7 +29,7 @@ async function FlotaSection({ inicio, fin }: { inicio?: string; fin?: string }) 
       ) : (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {vehiculos.map((v, i) => (
-            <VehiculoCard key={v.id} vehiculo={v} index={i} inicio={inicio} fin={fin} />
+            <VehiculoCard key={v.id} vehiculo={v} index={i} />
           ))}
         </div>
       )}
@@ -46,14 +37,7 @@ async function FlotaSection({ inicio, fin }: { inicio?: string; fin?: string }) 
   );
 }
 
-interface HomeProps {
-  searchParams: Promise<{ inicio?: string; fin?: string }>;
-}
-
-export default async function Home({ searchParams }: HomeProps) {
-  const sp = await searchParams;
-  const inicio = typeof sp.inicio === 'string' ? sp.inicio : undefined;
-  const fin = typeof sp.fin === 'string' ? sp.fin : undefined;
+export default async function Home() {
   const wa = await getWhatsAppInfo();
   const transparencia = await getTransparencia();
   return (
@@ -136,7 +120,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </section>
       }>
-        <FlotaSection inicio={inicio} fin={fin} />
+        <FlotaSection />
       </Suspense>
 
       {/* FOOTER */}

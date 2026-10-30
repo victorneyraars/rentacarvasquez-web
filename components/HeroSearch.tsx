@@ -35,7 +35,7 @@ export default function HeroSearch() {
       return;
     }
     const params = new URLSearchParams({ inicio, fin });
-    router.push(`/?${params.toString()}#flota`);
+    router.push(`/vehiculos?${params.toString()}`);
   };
 
   return (

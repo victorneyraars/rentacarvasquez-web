@@ -4,12 +4,23 @@ import { useState } from "react";
 import type { Vehiculo } from "@/lib/types";
 import { formatCLP, createReserva } from "@/lib/api";
 import { desglosarIva } from "@/lib/iva";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import VerifyEmailScreen from "@/components/VerifyEmailScreen";
 
 interface Props {
   vehiculo: Vehiculo;
   inicioInicial?: string;
   finInicial?: string;
+}
+
+function CustomPhoneInput({ className, ...props }: any) {
+  return (
+    <input
+      {...props}
+      className={`w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200 ${className || ""}`}
+    />
+  );
 }
 
 export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Props) {
@@ -168,12 +179,14 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
           <label className="mb-1 block text-sm font-semibold text-slate-700">
             Teléfono <span className="text-slate-400 font-normal">(opcional)</span>
           </label>
-          <input
-            type="tel"
+          <PhoneInput
+            international
+            defaultCountry="CL"
             value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            onChange={(val) => setTelefono(val || "")}
             placeholder="+56 9 1234 5678"
+            className="phone-input-custom"
+            inputComponent={CustomPhoneInput}
           />
           <p className="mt-1 text-xs text-slate-500">
             Para avisos de último momento sobre el vehículo

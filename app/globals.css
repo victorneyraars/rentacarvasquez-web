@@ -46,3 +46,25 @@ html {
   transform: translateY(-4px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
+
+/* Custom styles para react-phone-number-input */
+.phone-input-custom {
+  display: flex;
+  align-items: center;
+}
+
+.phone-input-custom .PhoneInputCountry {
+  margin-right: 8px;
+}
+
+.phone-input-custom .PhoneInputCountrySelect {
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background-color: white;
+}
+
+.phone-input-custom .PhoneInputInput {
+  flex: 1;
+  min-width: 0;
+}

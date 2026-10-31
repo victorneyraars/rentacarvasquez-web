@@ -8,6 +8,8 @@ import WhatsAppFloating from "@/components/WhatsAppFloating";
 import TransparenciaBlock from "@/components/TransparenciaBlock";
 import HeroSearch from "@/components/HeroSearch";
 import { getTransparencia } from "@/lib/transparencia-server";
+import Link from 'next/link';
+import { getEmailsVisibles } from "@/lib/canales-server";
 
 export const revalidate = 30;
 
@@ -40,6 +42,7 @@ async function FlotaSection() {
 export default async function Home() {
   const wa = await getWhatsAppInfo();
   const transparencia = await getTransparencia();
+  const emailsVisibles = await getEmailsVisibles();
   return (
     <main className="min-h-screen bg-slate-50">
       {/* HERO */}
@@ -138,7 +141,29 @@ export default async function Home() {
             <div>
               <h4 className="mb-3 font-semibold text-white">Contacto</h4>
               <p className="text-sm">📞 {PRESTADOR.telefono}</p>
-              <p className="text-sm">✉️ {PRESTADOR.email}</p>
+              {emailsVisibles.length > 0 ? (
+                <div className="mt-2 space-y-1">
+                  {emailsVisibles.slice(0, 3).map((e) => (
+                    <p key={e.tipo} className="text-sm">
+                      ✉️{" "}
+                      <a
+                        href={`mailto:${e.direccion}`}
+                        className="hover:text-white hover:underline"
+                      >
+                        {e.direccion}
+                      </a>
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm">✉️ {PRESTADOR.email}</p>
+              )}
+              <Link
+                href="/contacto"
+                className="mt-3 inline-block text-sm font-semibold text-blue-400 hover:text-blue-300"
+              >
+                Ver todos los canales →
+              </Link>
             </div>
             <div>
               <h4 className="mb-3 font-semibold text-white">Powered by</h4>

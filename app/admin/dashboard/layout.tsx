@@ -52,15 +52,16 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center gap-4 sm:gap-6">
             <Link
               href="/admin/dashboard"
-              className="text-lg font-extrabold text-slate-900"
+              className="text-sm font-extrabold text-slate-900 sm:text-lg"
             >
-              Rent a Car Vasquez
+              <span className="hidden sm:inline">Rent a Car Vasquez</span>
+              <span className="sm:hidden">RCV</span>
             </Link>
-            <nav className="flex gap-4 text-sm">
+            <nav className="flex gap-3 text-xs sm:gap-4 sm:text-sm">
               <Link
                 href="/admin/dashboard"
                 className={`font-semibold transition-colors ${
@@ -73,16 +74,19 @@ export default function DashboardLayout({
               </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right text-sm">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="hidden text-right text-sm sm:block">
               <div className="font-semibold text-slate-900">
                 {user?.nombre || user?.email}
               </div>
               <div className="text-xs text-slate-500">{user?.email}</div>
             </div>
+            <div className="text-xs font-semibold text-slate-900 sm:hidden">
+              {user?.nombre || user?.email?.split('@')[0]}
+            </div>
             <button
               onClick={handleLogout}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+              className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 sm:px-3 sm:py-1.5 sm:text-sm"
             >
               Salir
             </button>

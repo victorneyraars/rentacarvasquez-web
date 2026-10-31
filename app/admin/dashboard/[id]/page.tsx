@@ -198,7 +198,7 @@ export default function ReservaDetallePage() {
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-block rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+              className="mt-4 block w-full rounded-lg bg-green-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-green-700 sm:inline-block sm:w-auto"
             >
               💬 Contactar por WhatsApp
             </a>
@@ -265,18 +265,18 @@ export default function ReservaDetallePage() {
             Al confirmar o rechazar, se notificará automáticamente al cliente
             por email.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button
               onClick={() => handleAccion('confirmada')}
               disabled={accionando}
-              className="rounded-xl bg-green-600 px-8 py-3 text-base font-bold text-white shadow-lg transition-colors hover:bg-green-700 disabled:opacity-50"
+              className="w-full rounded-xl bg-green-600 px-8 py-3 text-base font-bold text-white shadow-lg transition-colors hover:bg-green-700 disabled:opacity-50 sm:w-auto"
             >
               {accionando ? 'Procesando...' : '✅ Aceptar reserva'}
             </button>
             <button
               onClick={() => handleAccion('cancelada')}
               disabled={accionando}
-              className="rounded-xl bg-red-600 px-8 py-3 text-base font-bold text-white shadow-lg transition-colors hover:bg-red-700 disabled:opacity-50"
+              className="w-full rounded-xl bg-red-600 px-8 py-3 text-base font-bold text-white shadow-lg transition-colors hover:bg-red-700 disabled:opacity-50 sm:w-auto"
             >
               {accionando ? 'Procesando...' : '❌ Rechazar reserva'}
             </button>

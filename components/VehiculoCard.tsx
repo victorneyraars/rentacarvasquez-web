@@ -62,10 +62,15 @@ export default function VehiculoCard({ vehiculo, index = 0, inicio, fin }: Props
 
         <div className="mt-4 flex items-end justify-between">
           <div>
-            <span className="text-2xl font-extrabold text-slate-900">
-              {formatCLP(vehiculo.precio_dia)}
-            </span>
-            <span className="text-sm text-slate-500"> / día</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-extrabold text-slate-900">
+                {formatCLP(vehiculo.precio_dia)}
+              </span>
+              <span className="text-sm text-slate-500">/ día</span>
+            </div>
+            <p className="mt-1 text-xs font-medium text-green-700">
+              IVA incluido
+            </p>
           </div>
           <span className="rounded-lg bg-accent-500 px-4 py-2 text-sm font-semibold text-white transition-colors group-hover:bg-accent-600">
             Reservar →

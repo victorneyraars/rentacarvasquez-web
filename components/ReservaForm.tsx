@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Vehiculo } from "@/lib/types";
 import { formatCLP, createReserva } from "@/lib/api";
+import { desglosarIva } from "@/lib/iva";
 import VerifyEmailScreen from "@/components/VerifyEmailScreen";
 
 interface Props {
@@ -24,6 +25,7 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
 
   const dias = calcularDias(fechaInicio, fechaFin);
   const precioTotal = dias * vehiculo.precio_dia;
+  const ivaBreakdown = desglosarIva(precioTotal);
 
   function calcularDias(inicio: string, fin: string): number {
     if (!inicio || !fin) return 0;
@@ -79,6 +81,9 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
         <div className="text-3xl font-extrabold text-slate-900">
           {formatCLP(vehiculo.precio_dia)}
         </div>
+        <p className="mt-1 text-xs font-medium text-green-700">
+          IVA incluido
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -121,6 +126,13 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
                 {formatCLP(precioTotal)}
               </span>
             </div>
+            <div className="mt-2 border-t border-brand-200 pt-2 text-xs text-slate-500">
+              Neto: {formatCLP(ivaBreakdown.neto)} + IVA 19%:{" "}
+              {formatCLP(ivaBreakdown.iva)}
+            </div>
+            <p className="mt-1 text-xs font-semibold text-green-700">
+              ✅ Precio final con IVA incluido
+            </p>
           </div>
         )}
 

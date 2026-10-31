@@ -33,12 +33,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const img = vehiculo.imagen_url || CATEGORIA_IMAGEN[vehiculo.categoria] || DEFAULT_IMG;
   return {
     title: "Arrendar " + vehiculo.marca + " " + vehiculo.modelo + " " + vehiculo.anio + " en Puerto Natales",
-    description: "Arriendo de " + vehiculo.marca + " " + vehiculo.modelo + " " + vehiculo.anio + " (" + vehiculo.categoria + ") en Puerto Natales. Precio " + formatCLP(vehiculo.precio_dia) + " por dia.",
+    description: "Arriendo de " + vehiculo.marca + " " + vehiculo.modelo + " " + vehiculo.anio + " (" + vehiculo.categoria + ") en Puerto Natales. Precio " + formatCLP(vehiculo.precio_dia) + " por dia (IVA incluido).",
     alternates: { canonical: SITE.url + "/vehiculos/" + vehiculo.id },
     openGraph: {
       type: "website",
       title: vehiculo.marca + " " + vehiculo.modelo + " " + vehiculo.anio + " | Rent a Car Vasquez",
-      description: "Arriendo " + vehiculo.categoria + " en Puerto Natales desde " + formatCLP(vehiculo.precio_dia) + "/dia.",
+      description: "Arriendo " + vehiculo.categoria + " en Puerto Natales desde " + formatCLP(vehiculo.precio_dia) + "/dia (IVA incluido).",
       images: [{ url: img, width: 1200, height: 630, alt: vehiculo.marca + " " + vehiculo.modelo }],
     },
   };

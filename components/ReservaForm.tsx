@@ -7,6 +7,8 @@ import { desglosarIva } from "@/lib/iva";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import VerifyEmailScreen from "@/components/VerifyEmailScreen";
+import GoogleLoginButton from "@/components/GoogleLoginButton";
+import { type AuthUser } from "@/lib/auth-api";
 
 interface Props {
   vehiculo: Vehiculo;
@@ -32,6 +34,7 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
   const [metodoPago, setMetodoPago] = useState("transferencia");
   const [loading, setLoading] = useState(false);
   const [reservaCreada, setReservaCreada] = useState<{ id: string; email: string } | null>(null);
+  const [googleUser, setGoogleUser] = useState<AuthUser | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const dias = calcularDias(fechaInicio, fechaFin);
@@ -44,6 +47,12 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
     const d2 = new Date(fin).getTime();
     if (d2 <= d1) return 0;
     return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+  }
+
+  function handleGoogleSuccess(user: AuthUser) {
+    setGoogleUser(user);
+    if (user.email && !email) setEmail(user.email);
+    if (user.nombre && !nombre) setNombre(user.nombre);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -96,6 +105,28 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
           IVA incluido
         </p>
       </div>
+
+      {googleUser ? (
+        <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm">
+          <p className="flex items-center gap-2 font-semibold text-green-800">
+            <span>✅</span>
+            <span>Conectado como {googleUser.email}</span>
+          </p>
+          <p className="mt-1 text-xs text-green-700">
+            Hemos completado tus datos. Podés editarlos si necesitás.
+          </p>
+        </div>
+      ) : (
+        <div className="mb-4">
+          <GoogleLoginButton
+            onSuccess={handleGoogleSuccess}
+            label="Autocompletar con Google (opcional)"
+          />
+          <p className="mt-2 text-center text-xs text-slate-500">
+            o completá manualmente
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

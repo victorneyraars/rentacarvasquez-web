@@ -3,7 +3,7 @@
 
 import type { Vehiculo } from './types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api-dev.baqueanonatales.com';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api-dev.baqueanonatales.com';
 const PRESTADOR_ID = process.env.NEXT_PUBLIC_PRESTADOR_ID ?? '';
 
 export const REVALIDATE_SECONDS = 30;

@@ -8,6 +8,8 @@ import {
   cambiarEstadoReserva,
   type AdminReserva,
 } from '@/lib/admin-api';
+import EstadoBadge from '@/components/admin/EstadoBadge';
+import GuiaContextual from '@/components/admin/GuiaContextual';
 
 export default function ReservaDetallePage() {
   const params = useParams();
@@ -130,18 +132,10 @@ export default function ReservaDetallePage() {
             {reserva.nombre_cliente || 'Cliente'}
           </p>
         </div>
-        <span
-          className={`inline-block rounded-full px-4 py-2 text-sm font-bold ${
-            reserva.estado === 'pendiente'
-              ? 'bg-yellow-100 text-yellow-800'
-              : reserva.estado === 'confirmada'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {reserva.estado.toUpperCase()}
-        </span>
+        <EstadoBadge estado={reserva.estado} size="md" />
       </div>
+
+      <GuiaContextual estado={reserva.estado} />
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Cliente */}

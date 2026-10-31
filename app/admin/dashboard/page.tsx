@@ -7,6 +7,9 @@ import {
   cambiarEstadoReserva,
   type AdminReserva,
 } from '@/lib/admin-api';
+import GuiaRapida from '@/components/admin/GuiaRapida';
+import SectionHeader from '@/components/admin/SectionHeader';
+import EstadoBadge from '@/components/admin/EstadoBadge';
 
 type Filtro = 'todas' | 'pendiente' | 'confirmada' | 'cancelada';
 
@@ -83,12 +86,13 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-extrabold text-slate-900">Reservas</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Gestión de reservas de tu flota
-        </p>
-      </div>
+      <SectionHeader
+        title="Reservas"
+        description="Revisá y gestioná las reservas de tu flota. Las pendientes esperan tu aprobación. Al aceptar o rechazar, el cliente recibe un email automático."
+        help="Cada reserva que llega desde la web aparece acá. Aceptá o rechazá para notificar al cliente."
+      />
+
+      <GuiaRapida />
 
       {/* Filtros */}
       <div className="mb-4 flex flex-wrap gap-2">
@@ -96,6 +100,7 @@ export default function DashboardPage() {
           <button
             key={f.key}
             onClick={() => setFiltro(f.key)}
+            title={`Ver reservas en estado "${f.label.toLowerCase()}"`}
             className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
               filtro === f.key
                 ? 'bg-brand-600 text-white'
@@ -108,6 +113,7 @@ export default function DashboardPage() {
         <button
           onClick={cargar}
           disabled={loading}
+          title="Vuelve a pedir las reservas al servidor"
           className="ml-auto rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 disabled:opacity-50"
         >
           {loading ? 'Cargando...' : '↻ Recargar'}
@@ -168,11 +174,7 @@ export default function DashboardPage() {
                       {formatCLP(r.precio_total)}
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`inline-block rounded-full px-2.5 py-1 text-xs font-bold ${badgeEstado(r.estado)}`}
-                      >
-                        {r.estado}
-                      </span>
+                      <EstadoBadge estado={r.estado} />
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
@@ -181,6 +183,7 @@ export default function DashboardPage() {
                             <button
                               onClick={() => handleAccion(r.id, 'confirmada')}
                               disabled={procesando === r.id}
+                              title="Confirma la reserva y envía email al cliente. El auto queda bloqueado para esas fechas."
                               className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-50"
                             >
                               {procesando === r.id ? '...' : 'Aceptar'}
@@ -188,6 +191,7 @@ export default function DashboardPage() {
                             <button
                               onClick={() => handleAccion(r.id, 'cancelada')}
                               disabled={procesando === r.id}
+                              title="Cancela la reserva y envía email al cliente. El auto vuelve a estar disponible."
                               className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                             >
                               {procesando === r.id ? '...' : 'Rechazar'}
@@ -196,6 +200,7 @@ export default function DashboardPage() {
                         )}
                         <Link
                           href={`/admin/dashboard/${r.id}`}
+                          title="Abre el detalle completo con datos del cliente, vehículo y fechas."
                           className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
                         >
                           Ver
@@ -225,11 +230,7 @@ export default function DashboardPage() {
                       {r.email_verificado && ' ✅'}
                     </div>
                   </div>
-                  <span
-                    className={`inline-block shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${badgeEstado(r.estado)}`}
-                  >
-                    {r.estado}
-                  </span>
+                  <EstadoBadge estado={r.estado} />
                 </div>
 
                 <div className="mt-3 space-y-1 text-sm">
@@ -248,6 +249,7 @@ export default function DashboardPage() {
                       <button
                         onClick={() => handleAccion(r.id, 'confirmada')}
                         disabled={procesando === r.id}
+                        title="Confirma la reserva y envía email al cliente."
                         className="flex-1 rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-50"
                       >
                         {procesando === r.id ? '...' : 'Aceptar'}
@@ -255,6 +257,7 @@ export default function DashboardPage() {
                       <button
                         onClick={() => handleAccion(r.id, 'cancelada')}
                         disabled={procesando === r.id}
+                        title="Cancela la reserva y envía email al cliente."
                         className="flex-1 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                       >
                         {procesando === r.id ? '...' : 'Rechazar'}
@@ -263,6 +266,7 @@ export default function DashboardPage() {
                   )}
                   <Link
                     href={`/admin/dashboard/${r.id}`}
+                    title="Abre el detalle completo de la reserva."
                     className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-center text-xs font-semibold text-slate-700 hover:bg-slate-100"
                   >
                     Ver

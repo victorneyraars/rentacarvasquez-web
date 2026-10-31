@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { getMe, type AdminUser } from '@/lib/admin-api';
 import { obtenerJwt, limpiarJwt } from '@/lib/auth-api';
+import BotonAyuda from '@/components/admin/BotonAyuda';
 
 export default function DashboardLayout({
   children,
@@ -84,6 +85,7 @@ export default function DashboardLayout({
             <div className="text-xs font-semibold text-slate-900 sm:hidden">
               {user?.nombre || user?.email?.split('@')[0]}
             </div>
+            <BotonAyuda />
             <button
               onClick={handleLogout}
               className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 sm:px-3 sm:py-1.5 sm:text-sm"

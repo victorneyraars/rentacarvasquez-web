@@ -40,9 +40,9 @@ export default async function VehiculosPage({ searchParams }: VehiculosPageProps
           </div>
         </div>
       </section>
-      <section className="mx-auto max-w-7xl px-6 py-16">
+      <section className="mx-auto max-w-7xl px-6 py-10 sm:py-16">
         {vehiculos.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-slate-300 py-20 text-center">
+          <div className="rounded-2xl border-2 border-dashed border-slate-300 py-12 text-center sm:py-20">
             <p className="text-lg text-slate-500">No hay vehículos disponibles en este momento.</p>
           </div>
         ) : (

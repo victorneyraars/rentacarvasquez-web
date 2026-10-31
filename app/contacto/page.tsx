@@ -64,7 +64,7 @@ export default async function ContactoPage() {
     <main className="min-h-screen bg-slate-50">
       <JsonLd data={organizationJsonLd} />
 
-      <section className="bg-slate-900 py-16">
+      <section className="bg-slate-900 py-10 sm:py-16">
         <div className="mx-auto max-w-7xl px-6">
           <Link
             href="/"
@@ -81,7 +81,7 @@ export default async function ContactoPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16">
+      <section className="mx-auto max-w-7xl px-6 py-10 sm:py-16">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <h2 className="mb-4 text-lg font-bold text-slate-900">

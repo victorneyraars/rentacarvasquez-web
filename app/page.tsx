@@ -16,7 +16,7 @@ export const revalidate = 30;
 async function FlotaSection() {
   const vehiculos = await getVehiculosDelPrestador();
   return (
-    <section id="flota" className="mx-auto max-w-7xl px-6 py-20">
+    <section id="flota" className="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:py-20">
       <div className="mb-12 text-center">
         <h2 className="text-4xl font-extrabold text-slate-900">Nuestra Flota</h2>
         <p className="mt-3 text-lg text-slate-600">
@@ -25,7 +25,7 @@ async function FlotaSection() {
       </div>
 
       {vehiculos.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-slate-300 py-20 text-center">
+        <div className="rounded-2xl border-2 border-dashed border-slate-300 py-12 text-center sm:py-20">
           <p className="text-lg text-slate-500">No hay vehiculos disponibles en este momento.</p>
         </div>
       ) : (
@@ -47,12 +47,12 @@ export default async function Home() {
     <main className="min-h-screen bg-slate-50">
       {/* HERO */}
       <section className="hero-gradient relative overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 py-24 lg:py-32">
+        <div className="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:py-32">
           <div className="max-w-2xl">
             <span className="mb-4 inline-block rounded-full bg-white/20 px-4 py-1 text-sm font-semibold text-white backdrop-blur">
               🚗 {PRESTADOR.ciudad} · Patagonia Chilena
             </span>
-            <h1 className="mb-6 text-5xl font-extrabold leading-tight text-white lg:text-6xl">
+            <h1 className="mb-6 text-3xl font-extrabold leading-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
               Arrienda tu auto en {PRESTADOR.ciudad}
             </h1>
             <p className="mb-8 text-lg text-white/90 lg:text-xl">
@@ -62,13 +62,13 @@ export default async function Home() {
             <div className="flex flex-wrap gap-4">
               <a
                 href="#flota"
-                className="rounded-xl bg-accent-500 px-8 py-4 text-base font-bold text-white shadow-xl transition-all hover:bg-accent-600 hover:shadow-2xl"
+                className="rounded-xl bg-accent-500 px-5 py-3 text-sm font-bold text-white shadow-xl transition-all hover:bg-accent-600 hover:shadow-2xl sm:px-8 sm:py-4 sm:text-base"
               >
                 Ver flota →
               </a>
               <a
                 href={`tel:${PRESTADOR.telefono}`}
-                className="rounded-xl bg-white/10 px-8 py-4 text-base font-bold text-white backdrop-blur ring-1 ring-white/30 transition-all hover:bg-white/20"
+                className="rounded-xl bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur ring-1 ring-white/30 transition-all hover:bg-white/20 sm:px-8 sm:py-4 sm:text-base"
               >
                 📞 Llamar
               </a>
@@ -111,7 +111,7 @@ export default async function Home() {
 
       {/* CATALOGO con Suspense para no bloquear el hero */}
       <Suspense fallback={
-        <section id="flota" className="mx-auto max-w-7xl px-6 py-20">
+        <section id="flota" className="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:py-20">
           <div className="mb-12 text-center">
             <h2 className="text-4xl font-extrabold text-slate-900">Nuestra Flota</h2>
             <p className="mt-3 text-lg text-slate-600">Cargando vehiculos...</p>

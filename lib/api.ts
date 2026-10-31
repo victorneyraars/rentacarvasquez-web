@@ -105,3 +105,39 @@ export async function getPerfilCompleto(): Promise<PerfilCompleto | null> {
     return null;
   }
 }
+
+// =========================================================
+// Verificación OTP de email de reserva
+// =========================================================
+export async function verificarEmailReserva(
+  reservaId: string,
+  codigo: string,
+): Promise<{ ok: boolean; mensaje: string; email_verificado: boolean }> {
+  const res = await fetch(
+    `${API_URL}/api/v1/public/rentacar/reservas/${reservaId}/verificar-email`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codigo }),
+    },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Error ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function reenviarOtpReserva(
+  reservaId: string,
+): Promise<{ ok: boolean; mensaje: string }> {
+  const res = await fetch(
+    `${API_URL}/api/v1/public/rentacar/reservas/${reservaId}/reenviar-otp`,
+    { method: 'POST' },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Error ${res.status}`);
+  }
+  return res.json();
+}

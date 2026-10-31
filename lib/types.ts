@@ -43,7 +43,7 @@ export interface ReservaCreate {
   fecha_fin: string;
   nombre_cliente: string;
   email_cliente: string;
-  telefono_cliente: string;
+  telefono_cliente?: string | null;
   metodo_pago: string;
   precio_total: number;
 }

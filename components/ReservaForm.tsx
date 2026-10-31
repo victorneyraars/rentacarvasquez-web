@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Vehiculo } from "@/lib/types";
 import { formatCLP, createReserva } from "@/lib/api";
+import VerifyEmailScreen from "@/components/VerifyEmailScreen";
 
 interface Props {
   vehiculo: Vehiculo;
@@ -18,7 +19,7 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
   const [telefono, setTelefono] = useState("");
   const [metodoPago, setMetodoPago] = useState("transferencia");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [reservaCreada, setReservaCreada] = useState<{ id: string; email: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const dias = calcularDias(fechaInicio, fechaFin);
@@ -35,7 +36,6 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
     if (dias <= 0) {
       setError("Selecciona fechas válidas");
       return;
@@ -48,14 +48,11 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
         fecha_fin: fechaFin,
         nombre_cliente: nombre,
         email_cliente: email,
-        telefono_cliente: telefono,
+        telefono_cliente: telefono || null,
         metodo_pago: metodoPago,
         precio_total: precioTotal,
       });
-      setSuccess(`¡Reserva creada! Código: ${reserva.id.slice(0, 8)}`);
-      setNombre("");
-      setEmail("");
-      setTelefono("");
+      setReservaCreada({ id: reserva.id, email: email });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al reservar");
     } finally {
@@ -64,6 +61,16 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
   }
 
   const hoy = new Date().toISOString().split("T")[0];
+
+  // Si la reserva ya se creo -> mostrar pantalla de verificacion OTP
+  if (reservaCreada) {
+    return (
+      <VerifyEmailScreen
+        reservaId={reservaCreada.id}
+        email={reservaCreada.email}
+      />
+    );
+  }
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-200/50">
@@ -147,16 +154,18 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
 
         <div>
           <label className="mb-1 block text-sm font-semibold text-slate-700">
-            Teléfono
+            Teléfono <span className="text-slate-400 font-normal">(opcional)</span>
           </label>
           <input
             type="tel"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
-            required
             className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
             placeholder="+56 9 1234 5678"
           />
+          <p className="mt-1 text-xs text-slate-500">
+            Para avisos de último momento sobre el vehículo
+          </p>
         </div>
 
         <div>
@@ -177,12 +186,6 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
         {error && (
           <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
             {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700">
-            ✅ {success}
           </div>
         )}
 

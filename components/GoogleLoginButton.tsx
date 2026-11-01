@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -27,27 +28,42 @@ export default function GoogleLoginButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Capturar el resultado de la redirección de Google
+  useEffect(() => {
+    async function checkRedirect() {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          setLoading(true);
+          const idToken = await result.user.getIdToken();
+          const response = await loginConFirebase(idToken);
+          guardarJwt(response.access_token);
+          await signOut(auth);
+          onSuccess?.(response.user);
+        }
+      } catch (err) {
+        console.error('[GoogleRedirect] Error:', err);
+        const msg = err instanceof Error ? err.message : 'Error al procesar login';
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
+    }
+    checkRedirect();
+  }, [onSuccess]);
+
   async function handleClick() {
     setLoading(true);
     setError(null);
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      const credential = await signInWithPopup(auth, provider);
-      const idToken = await credential.user.getIdToken();
-      const response = await loginConFirebase(idToken);
-      guardarJwt(response.access_token);
-      await signOut(auth);
-      onSuccess?.(response.user);
+      // Esto redirige toda la página a Google
+      await signInWithRedirect(auth, provider);
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : 'Error al iniciar sesion';
-      if (msg.includes('popup-closed-by-user')) {
-        setLoading(false);
-        return;
-      }
+      console.error('[GoogleRedirect] Error al iniciar:', err);
+      const msg = err instanceof Error ? err.message : 'Error al redirigir';
       setError(msg);
-    } finally {
       setLoading(false);
     }
   }

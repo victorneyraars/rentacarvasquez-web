@@ -67,6 +67,8 @@ function AdminLoginContent() {
   }, [router, inviteToken]);
 
   async function handleSuccess(_user: AuthUser) {
+    // Esperamos un tick para que el JWT se guarde en localStorage
+    await new Promise((r) => setTimeout(r, 100));
     if (inviteToken) {
       await procesarInvitacion();
     } else {

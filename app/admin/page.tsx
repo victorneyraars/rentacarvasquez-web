@@ -16,7 +16,6 @@ function AdminLoginContent() {
   const [error, setError] = useState<string | null>(null);
   const [aceptando, setAceptando] = useState(false);
 
-  // Decodificar el JWT localmente para sacar el prestador_id
   function getPrestadorIdFromToken(token: string): string | null {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -26,65 +25,50 @@ function AdminLoginContent() {
     }
   }
 
+  async function procesarInvitacion() {
+    if (!inviteToken) return;
+    const prestadorId = getPrestadorIdFromToken(inviteToken);
+    if (!prestadorId) {
+      setError('El enlace de invitación es inválido o está corrupto.');
+      setAceptando(false);
+      return;
+    }
+    setAceptando(true);
+    try {
+      await aceptarInvitacion(prestadorId, inviteToken);
+      router.replace('/admin/dashboard?invite_ok=1');
+    } catch (err: any) {
+      setError(err.message || 'Error al aceptar la invitación');
+      setAceptando(false);
+    }
+  }
+
   useEffect(() => {
+    let mounted = true;
     const token = obtenerJwt();
-    
-    // Si hay invite pero no hay sesión, dejamos que se loguee
     if (!token) {
       setChecking(false);
       return;
     }
-
-    // Si hay sesión, verificar si es válida y procesar invite
     getMe()
-      .then(async () => {
+      .then(() => {
+        if (!mounted) return;
         if (inviteToken) {
-          const prestadorId = getPrestadorIdFromToken(inviteToken);
-          if (!prestadorId) {
-            setError('El enlace de invitación es inválido o está corrupto.');
-            setChecking(false);
-            return;
-          }
-          
-          setAceptando(true);
-          try {
-            await aceptarInvitacion(prestadorId, inviteToken);
-            // Éxito: redirigir al dashboard con mensaje
-            router.replace('/admin/dashboard?invite_ok=1');
-          } catch (err: any) {
-            setError(err.message || 'Error al aceptar la invitación');
-            setAceptando(false);
-          }
+          procesarInvitacion();
         } else {
           router.replace('/admin/dashboard');
         }
       })
       .catch(() => {
-        // Token inválido, ignorar (el usuario puede volver a loguearse)
+        if (!mounted) return;
         setChecking(false);
       });
+    return () => { mounted = false; };
   }, [router, inviteToken]);
 
   async function handleSuccess(_user: AuthUser) {
-    // Al loguearse, el useEffect se dispara de nuevo (porque cambia el estado)
-    // Pero como no cambia de ruta, forzamos la ejecución recargando el estado
-    const token = obtenerJwt();
-    if (!token) return;
-
     if (inviteToken) {
-      const prestadorId = getPrestadorIdFromToken(inviteToken);
-      if (!prestadorId) {
-        setError('Enlace de invitación inválido.');
-        return;
-      }
-      setAceptando(true);
-      try {
-        await aceptarInvitacion(prestadorId, inviteToken);
-        router.replace('/admin/dashboard?invite_ok=1');
-      } catch (err: any) {
-        setError(err.message || 'Error al aceptar invitación');
-        setAceptando(false);
-      }
+      await procesarInvitacion();
     } else {
       router.replace('/admin/dashboard');
     }
@@ -121,13 +105,11 @@ function AdminLoginContent() {
             ? 'Iniciá sesión para aceptar la invitación a colaborar.' 
             : 'Ingresá con tu cuenta de Google para gestionar tus reservas.'}
         </p>
-
         {error && (
           <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
             {error}
           </div>
         )}
-
         <GoogleLoginButton onSuccess={handleSuccess} />
       </div>
     </div>

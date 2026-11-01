@@ -17,6 +17,10 @@ export interface AdminReserva {
   id: string;
   vehiculo_id: string;
   vehiculo_label?: string;
+  vehiculo_patente?: string | null;
+  vehiculo_marca?: string | null;
+  vehiculo_modelo?: string | null;
+  vehiculo_imagen_url?: string | null;
   fecha_inicio: string;
   fecha_fin: string;
   metodo_pago: string;

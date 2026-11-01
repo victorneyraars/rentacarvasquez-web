@@ -11,6 +11,42 @@ interface Props {
   procesando: string | null;
 }
 
+function VehiculoThumbnail({
+  url,
+  patente,
+  size = 40,
+}: {
+  url?: string | null;
+  patente?: string | null;
+  size?: number;
+}) {
+  const px = `${size}px`;
+  if (url) {
+    return (
+      <img
+        src={url}
+        alt={patente || 'Vehículo'}
+        width={size}
+        height={size}
+        loading="lazy"
+        className="shrink-0 rounded-lg border border-slate-200 bg-slate-100 object-cover"
+        style={{ width: px, height: px }}
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).style.display = 'none';
+        }}
+      />
+    );
+  }
+  return (
+    <div
+      className="flex shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400"
+      style={{ width: px, height: px }}
+    >
+      <span style={{ fontSize: `${size * 0.5}px` }}>🚗</span>
+    </div>
+  );
+}
+
 function formatFecha(iso: string): string {
   return new Date(iso).toLocaleDateString('es-CL', {
     day: '2-digit',
@@ -84,8 +120,17 @@ export default function DataTable({ reservas, onAccion, procesando }: Props) {
                     {r.email_verificado && ' ✅'}
                   </div>
                 </td>
-                <td className="px-4 py-3 text-slate-700">
-                  {r.vehiculo_label || '—'}
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <VehiculoThumbnail
+                      url={r.vehiculo_imagen_url}
+                      patente={r.vehiculo_patente}
+                      size={40}
+                    />
+                    <span className="text-slate-700">
+                      {r.vehiculo_label || '—'}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-slate-700">
                   {formatFecha(r.fecha_inicio)} → {formatFecha(r.fecha_fin)}
@@ -140,27 +185,38 @@ export default function DataTable({ reservas, onAccion, procesando }: Props) {
             key={r.id}
             className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200"
           >
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-3">
+              <VehiculoThumbnail
+                url={r.vehiculo_imagen_url}
+                patente={r.vehiculo_patente}
+                size={80}
+              />
               <div className="min-w-0 flex-1">
-                <div className="font-semibold text-slate-900">
-                  {r.nombre_cliente || 'Sin nombre'}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-slate-900">
+                      {r.nombre_cliente || 'Sin nombre'}
+                    </div>
+                    <div className="truncate text-xs text-slate-500">
+                      {r.email_cliente}
+                      {r.email_verificado && ' ✅'}
+                    </div>
+                  </div>
+                  <EstadoBadge estado={r.estado} />
                 </div>
-                <div className="truncate text-xs text-slate-500">
-                  {r.email_cliente}
-                  {r.email_verificado && ' ✅'}
+                <div className="mt-2 space-y-0.5 text-sm">
+                  {r.vehiculo_label && (
+                    <div className="font-semibold text-slate-700">
+                      {r.vehiculo_label}
+                    </div>
+                  )}
+                  <div className="text-slate-700">
+                    📅 {formatFecha(r.fecha_inicio)} → {formatFecha(r.fecha_fin)}
+                  </div>
+                  <div className="font-semibold text-slate-900">
+                    💰 {formatCLP(r.precio_total)}
+                  </div>
                 </div>
-              </div>
-              <EstadoBadge estado={r.estado} />
-            </div>
-            <div className="mt-3 space-y-1 text-sm">
-              {r.vehiculo_label && (
-                <div className="text-slate-700">🚗 {r.vehiculo_label}</div>
-              )}
-              <div className="text-slate-700">
-                📅 {formatFecha(r.fecha_inicio)} → {formatFecha(r.fecha_fin)}
-              </div>
-              <div className="font-semibold text-slate-900">
-                💰 {formatCLP(r.precio_total)}
               </div>
             </div>
             <div className="mt-3 flex gap-2">

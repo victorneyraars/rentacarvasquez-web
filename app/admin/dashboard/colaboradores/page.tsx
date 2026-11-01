@@ -71,9 +71,10 @@ export default function ColaboradoresPage() {
         return;
       }
       if (!p.es_owner) {
-        setError('Solo el dueño puede gestionar colaboradores.');
         setPrestador(p);
         setLoading(false);
+        // Auto-redirect con mensaje contextual
+        setError('__not_owner__');
         return;
       }
       setPrestador(p);
@@ -158,12 +159,21 @@ export default function ColaboradoresPage() {
     return <SkeletonLoader />;
   }
 
+  // Error de "no autorizado" (permanente, no se reintenta)
+  if (error === '__not_owner__') {
+    return <NotOwnerView onVolver={() => router.replace('/admin/dashboard')} />;
+  }
+
+  // Error genérico (transitorio, sí se reintenta)
   if (error) {
     return (
       <div className="mx-auto max-w-2xl py-12">
-        <div className="rounded-xl bg-red-50 p-6 text-center">
-          <div className="mb-3 text-3xl">⚠️</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+          <div className="mb-3 text-3xl" aria-hidden="true">⚠️</div>
           <h2 className="text-lg font-semibold text-red-900">{error}</h2>
+          <p className="mt-2 text-sm text-red-700">
+            Si el problema persiste, cerrá sesión y volvé a entrar.
+          </p>
           <button
             onClick={cargar}
             className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
@@ -423,6 +433,42 @@ function EmptyState({ onInvitar }: { onInvitar: () => void }) {
 // ─────────────────────────────────────────────────────────────
 // Skeleton loader
 // ─────────────────────────────────────────────────────────────
+function NotOwnerView({ onVolver }: { onVolver: () => void }) {
+  useEffect(() => {
+    // Auto-redirect a los 5s (le da tiempo a leer)
+    const timer = setTimeout(onVolver, 5000);
+    return () => clearTimeout(timer);
+  }, [onVolver]);
+
+  return (
+    <div className="mx-auto max-w-xl py-12">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center">
+        <div className="mb-4 text-5xl" aria-hidden="true">🔒</div>
+        <h1 className="text-xl font-bold text-amber-900">
+          Esta sección es solo para el dueño
+        </h1>
+        <p className="mx-auto mt-3 max-w-md text-sm text-amber-800">
+          Como colaborador podés gestionar reservas y vehículos, pero no invitar
+          o eliminar colaboradores. Si necesitás acceso, contactá al dueño del
+          negocio.
+        </p>
+        <button
+          onClick={onVolver}
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-700"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Volver al panel
+        </button>
+        <p className="mt-4 text-xs text-amber-700">
+          Te redirigimos automáticamente en 5 segundos…
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function SkeletonLoader() {
   return (
     <div>

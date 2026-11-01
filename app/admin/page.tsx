@@ -27,6 +27,7 @@ function AdminLoginContent() {
 
   async function procesarInvitacion() {
     if (!inviteToken) return;
+    setChecking(false); // Forzamos apagar la pantalla de "Verificando"
     const prestadorId = getPrestadorIdFromToken(inviteToken);
     if (!prestadorId) {
       setError('El enlace de invitación es inválido o está corrupto.');
@@ -38,6 +39,7 @@ function AdminLoginContent() {
       await aceptarInvitacion(prestadorId, inviteToken);
       router.replace('/admin/dashboard?invite_ok=1');
     } catch (err: any) {
+      console.error('[ProcesarInvitacion] Error:', err);
       setError(err.message || 'Error al aceptar la invitación');
       setAceptando(false);
     }
@@ -50,9 +52,14 @@ function AdminLoginContent() {
       setChecking(false);
       return;
     }
-    getMe()
+    
+    // Timeout de 5 segundos para evitar que se cuelgue
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000));
+    
+    Promise.race([getMe(), timeout])
       .then(() => {
         if (!mounted) return;
+        setChecking(false); // Siempre apagamos "Verificando" si hay éxito
         if (inviteToken) {
           procesarInvitacion();
         } else {
@@ -61,13 +68,12 @@ function AdminLoginContent() {
       })
       .catch(() => {
         if (!mounted) return;
-        setChecking(false);
+        setChecking(false); // Siempre apagamos "Verificando" si hay error
       });
     return () => { mounted = false; };
   }, [router, inviteToken]);
 
   async function handleSuccess(_user: AuthUser) {
-    // Esperamos un tick para que el JWT se guarde en localStorage
     await new Promise((r) => setTimeout(r, 100));
     if (inviteToken) {
       await procesarInvitacion();

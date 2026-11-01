@@ -152,3 +152,27 @@ export async function getVehiculos(): Promise<AdminVehiculo[]> {
   if (!res.ok) throw new Error('Error al cargar vehiculos');
   return res.json();
 }
+
+// ── Colaboradores ─────────────────────────────────────────────
+export async function aceptarInvitacion(prestadorId: string, token: string) {
+  const jwt = obtenerJwt();
+  if (!jwt) throw new Error('No hay sesión activa');
+
+  const res = await fetch(
+    `${API_URL}/api/v1/mis-prestadores/${prestadorId}/colaboradores/aceptar`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwt}`,
+      },
+      body: JSON.stringify({ token }),
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Error al aceptar invitación');
+  }
+  return res.json();
+}

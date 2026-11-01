@@ -82,16 +82,28 @@ export default function DashboardLayout({
                 Reservas
               </Link>
               {isOwner && (
-                <Link
-                  href="/admin/dashboard/colaboradores"
-                  className={`font-semibold transition-colors ${
-                    pathname === '/admin/dashboard/colaboradores'
-                      ? 'text-brand-600'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Colaboradores
-                </Link>
+                <>
+                  <Link
+                    href="/admin/dashboard/colaboradores"
+                    className={`font-semibold transition-colors ${
+                      pathname === '/admin/dashboard/colaboradores'
+                        ? 'text-brand-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Colaboradores
+                  </Link>
+                  <Link
+                    href="/admin/dashboard/auditoria"
+                    className={`font-semibold transition-colors ${
+                      pathname === '/admin/dashboard/auditoria'
+                        ? 'text-brand-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Auditoría
+                  </Link>
+                </>
               )}
             </nav>
           </div>

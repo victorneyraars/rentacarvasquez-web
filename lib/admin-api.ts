@@ -176,3 +176,136 @@ export async function aceptarInvitacion(prestadorId: string, token: string) {
   }
   return res.json();
 }
+
+// ═══════════════════════════════════════════════════════════════
+// FASE 6: COLABORADORES + AUDITORÍA
+// ═══════════════════════════════════════════════════════════════
+
+export interface AdminColaborador {
+  email: string;
+  nombre: string;
+  whatsapp: string | null;
+  invitado_por: string;
+  invitado_at: string;
+  activado_at: string | null;
+  rol: string;
+}
+
+export interface InvitarColaboradorPayload {
+  email: string;
+  nombre: string;
+  whatsapp?: string;
+}
+
+export interface AdminAuditLogEntry {
+  id: string;
+  user_email: string;
+  accion: string;
+  entidad: string;
+  entidad_id: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface AdminAuditLogPage {
+  data: AdminAuditLogEntry[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface AuditLogFiltros {
+  page?: number;
+  page_size?: number;
+  entidad?: string;
+  accion?: string;
+}
+
+export interface MiPrestador {
+  id: string;
+  slug: string;
+  nombre: string;
+  es_owner: boolean;
+}
+
+/**
+ * Obtiene el prestador principal del usuario logueado.
+ * Devuelve null si no tiene prestadores.
+ */
+export async function getMiPrestador(): Promise<MiPrestador | null> {
+  const res = await authFetch('/api/v1/mis-prestadores');
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Error ${res.status}`);
+  }
+  const json = await res.json();
+  const items = json.items || json;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const p = items[0];
+  return {
+    id: p.id,
+    slug: p.slug,
+    nombre: p.nombre,
+    es_owner: p.es_owner === true,
+  };
+}
+
+export async function getColaboradores(
+  prestadorId: string,
+): Promise<AdminColaborador[]> {
+  const res = await authFetch(
+    `/api/v1/mis-prestadores/${prestadorId}/colaboradores`,
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Error ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function invitarColaborador(
+  prestadorId: string,
+  payload: InvitarColaboradorPayload,
+): Promise<AdminColaborador> {
+  const res = await authFetch(
+    `/api/v1/mis-prestadores/${prestadorId}/colaboradores/invitar`,
+    { method: 'POST', body: JSON.stringify(payload) },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Error ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function eliminarColaborador(
+  prestadorId: string,
+  email: string,
+): Promise<void> {
+  const res = await authFetch(
+    `/api/v1/mis-prestadores/${prestadorId}/colaboradores/${encodeURIComponent(email)}`,
+    { method: 'DELETE' },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Error ${res.status}`);
+  }
+}
+
+export async function getAuditLog(
+  prestadorId: string,
+  filtros: AuditLogFiltros = {},
+): Promise<AdminAuditLogPage> {
+  const params = new URLSearchParams();
+  Object.entries(filtros).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') params.append(key, String(value));
+  });
+  const res = await authFetch(
+    `/api/v1/mis-prestadores/${prestadorId}/audit-log?${params.toString()}`,
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Error ${res.status}`);
+  }
+  return res.json();
+}

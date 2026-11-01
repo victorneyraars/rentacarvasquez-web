@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { getMe, type AdminUser } from '@/lib/admin-api';
+import { getMe, getMiPrestador, type AdminUser } from '@/lib/admin-api';
 import { obtenerJwt, limpiarJwt } from '@/lib/auth-api';
 import BotonAyuda from '@/components/admin/BotonAyuda';
 
@@ -15,6 +15,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<AdminUser | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,9 +24,13 @@ export default function DashboardLayout({
       router.replace('/admin');
       return;
     }
-    getMe()
-      .then((u) => {
+    Promise.all([
+      getMe(),
+      getMiPrestador().catch(() => null),
+    ])
+      .then(([u, p]) => {
         setUser(u);
+        setIsOwner(p?.es_owner === true);
         setLoading(false);
       })
       .catch(() => {
@@ -66,13 +71,28 @@ export default function DashboardLayout({
               <Link
                 href="/admin/dashboard"
                 className={`font-semibold transition-colors ${
-                  pathname === '/admin/dashboard'
-                    ? 'text-brand-600'
+                  pathname === '/admin/dashboard' ||
+                  pathname.startsWith('/admin/dashboard/')
+                    ? pathname === '/admin/dashboard'
+                      ? 'text-brand-600'
+                      : 'text-slate-600 hover:text-slate-900'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Reservas
               </Link>
+              {isOwner && (
+                <Link
+                  href="/admin/dashboard/colaboradores"
+                  className={`font-semibold transition-colors ${
+                    pathname === '/admin/dashboard/colaboradores'
+                      ? 'text-brand-600'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Colaboradores
+                </Link>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">

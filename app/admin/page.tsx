@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import GoogleLoginButton from '@/components/GoogleLoginButton';
 import { getMe, aceptarInvitacion } from '@/lib/admin-api';
-import { obtenerJwt } from '@/lib/auth-api';
+import { obtenerJwt, limpiarJwt } from '@/lib/auth-api';
 import type { AuthUser } from '@/lib/auth-api';
 
 function AdminLoginContent() {
@@ -16,10 +16,10 @@ function AdminLoginContent() {
   const [error, setError] = useState<string | null>(null);
   const [aceptando, setAceptando] = useState(false);
 
-  function getPrestadorIdFromToken(token: string): string | null {
+  function decodeToken(token: string): { prestador_id: string; email: string } | null {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.prestador_id || null;
+      return { prestador_id: payload.prestador_id, email: payload.email };
     } catch {
       return null;
     }
@@ -27,19 +27,18 @@ function AdminLoginContent() {
 
   async function procesarInvitacion() {
     if (!inviteToken) return;
-    setChecking(false); // Forzamos apagar la pantalla de "Verificando"
-    const prestadorId = getPrestadorIdFromToken(inviteToken);
-    if (!prestadorId) {
+    setChecking(false);
+    const decoded = decodeToken(inviteToken);
+    if (!decoded || !decoded.prestador_id) {
       setError('El enlace de invitación es inválido o está corrupto.');
-      setAceptando(false);
       return;
     }
+    
     setAceptando(true);
     try {
-      await aceptarInvitacion(prestadorId, inviteToken);
+      await aceptarInvitacion(decoded.prestador_id, inviteToken);
       router.replace('/admin/dashboard?invite_ok=1');
     } catch (err: any) {
-      console.error('[ProcesarInvitacion] Error:', err);
       setError(err.message || 'Error al aceptar la invitación');
       setAceptando(false);
     }
@@ -48,18 +47,29 @@ function AdminLoginContent() {
   useEffect(() => {
     let mounted = true;
     const token = obtenerJwt();
+    const decodedInvite = inviteToken ? decodeToken(inviteToken) : null;
+    const inviteEmail = decodedInvite?.email;
+
     if (!token) {
       setChecking(false);
       return;
     }
     
-    // Timeout de 5 segundos para evitar que se cuelgue
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000));
     
     Promise.race([getMe(), timeout])
-      .then(() => {
+      .then((user) => {
         if (!mounted) return;
-        setChecking(false); // Siempre apagamos "Verificando" si hay éxito
+        
+        // ¡AQUÍ ESTÁ LA MAGIA! Si hay invitación y el email no coincide, borramos la sesión.
+        if (inviteEmail && user.email !== inviteEmail) {
+          limpiarJwt();
+          setChecking(false);
+          setError(`Has iniciado sesión como ${user.email}. Por favor, ingresá con ${inviteEmail} para aceptar la invitación.`);
+          return;
+        }
+
+        setChecking(false);
         if (inviteToken) {
           procesarInvitacion();
         } else {
@@ -68,7 +78,7 @@ function AdminLoginContent() {
       })
       .catch(() => {
         if (!mounted) return;
-        setChecking(false); // Siempre apagamos "Verificando" si hay error
+        setChecking(false);
       });
     return () => { mounted = false; };
   }, [router, inviteToken]);

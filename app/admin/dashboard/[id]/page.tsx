@@ -137,6 +137,43 @@ export default function ReservaDetallePage() {
 
       <GuiaContextual estado={reserva.estado} />
 
+      {/* Vehículo card (destacada) */}
+      {(reserva.vehiculo_marca || reserva.vehiculo_patente) && (
+        <div className="mb-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <h2 className="mb-4 text-lg font-bold text-slate-900">
+            🚗 Vehículo
+          </h2>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            {reserva.vehiculo_imagen_url && (
+              <img
+                src={reserva.vehiculo_imagen_url}
+                alt={reserva.vehiculo_patente || 'Vehículo'}
+                className="h-24 w-32 shrink-0 rounded-lg border border-slate-200 object-cover"
+              />
+            )}
+            <div className="flex-1">
+              <div className="text-lg font-bold text-slate-900">
+                {reserva.vehiculo_marca} {reserva.vehiculo_modelo}
+              </div>
+              {reserva.vehiculo_patente && (
+                <div className="mt-1 text-sm text-slate-600">
+                  Patente:{' '}
+                  <span className="font-mono font-semibold">
+                    {reserva.vehiculo_patente}
+                  </span>
+                </div>
+              )}
+              <Link
+                href={`/vehiculos/${reserva.vehiculo_id}`}
+                className="mt-2 inline-block text-sm font-semibold text-blue-600 hover:underline"
+              >
+                Ver detalle del vehículo →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2">
         {/* Cliente */}
         <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
@@ -187,16 +224,26 @@ export default function ReservaDetallePage() {
               </dd>
             </div>
           </dl>
-          {waUrl && (
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 block w-full rounded-lg bg-green-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-green-700 sm:inline-block sm:w-auto"
-            >
-              💬 Contactar por WhatsApp
-            </a>
-          )}
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            {waUrl && (
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-green-700"
+              >
+                💬 WhatsApp
+              </a>
+            )}
+            {reserva.telefono_cliente && (
+              <a
+                href={`tel:${reserva.telefono_cliente}`}
+                className="flex-1 rounded-lg border-2 border-blue-600 bg-white px-4 py-2 text-center text-sm font-semibold text-blue-700 hover:bg-blue-50"
+              >
+                📞 Llamar
+              </a>
+            )}
+          </div>
         </div>
 
         {/* Reserva */}
@@ -243,6 +290,13 @@ export default function ReservaDetallePage() {
               </dt>
               <dd className="mt-1 text-2xl font-extrabold text-slate-900">
                 {formatCLP(reserva.precio_total)}
+              </dd>
+              <dd className="mt-1 text-xs text-slate-500">
+                Neto: {formatCLP(Math.round(reserva.precio_total / 1.19))} +
+                IVA 19%:{' '}
+                {formatCLP(
+                  reserva.precio_total - Math.round(reserva.precio_total / 1.19),
+                )}
               </dd>
             </div>
           </dl>

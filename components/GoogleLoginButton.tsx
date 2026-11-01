@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import {
   GoogleAuthProvider,
   signInWithRedirect,
-  getRedirectResult,
+  onAuthStateChanged,
   signOut,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -28,28 +28,26 @@ export default function GoogleLoginButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Capturar el resultado de la redirección de Google
   useEffect(() => {
-    async function checkRedirect() {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          setLoading(true);
-          const idToken = await result.user.getIdToken();
+    // Detecta automáticamente cuando el usuario vuelve de Google
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setLoading(true);
+        try {
+          const idToken = await user.getIdToken();
           const response = await loginConFirebase(idToken);
           guardarJwt(response.access_token);
-          await signOut(auth);
+          await signOut(auth); // Desloguea de Firebase, solo necesitamos nuestro JWT
           onSuccess?.(response.user);
+        } catch (err) {
+          console.error('[GoogleAuth] Error:', err);
+          setError('Error al conectar con el servidor');
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        console.error('[GoogleRedirect] Error:', err);
-        const msg = err instanceof Error ? err.message : 'Error al procesar login';
-        setError(msg);
-      } finally {
-        setLoading(false);
       }
-    }
-    checkRedirect();
+    });
+    return () => unsubscribe();
   }, [onSuccess]);
 
   async function handleClick() {
@@ -58,12 +56,10 @@ export default function GoogleLoginButton({
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      // Esto redirige toda la página a Google
       await signInWithRedirect(auth, provider);
     } catch (err) {
-      console.error('[GoogleRedirect] Error al iniciar:', err);
-      const msg = err instanceof Error ? err.message : 'Error al redirigir';
-      setError(msg);
+      console.error('[GoogleAuth] Error al iniciar:', err);
+      setError('Error al redirigir a Google');
       setLoading(false);
     }
   }

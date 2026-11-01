@@ -3,104 +3,100 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import GoogleLoginButton from '@/components/GoogleLoginButton';
-import { getMe, aceptarInvitacion } from '@/lib/admin-api';
-import { obtenerJwt, limpiarJwt } from '@/lib/auth-api';
+import { getMe } from '@/lib/admin-api';
+import { obtenerJwt, guardarJwt, limpiarJwt } from '@/lib/auth-api';
 import type { AuthUser } from '@/lib/auth-api';
+import { API_URL } from '@/lib/api';
 
 function AdminLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get('invite');
-  
+
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aceptando, setAceptando] = useState(false);
 
-  function getPrestadorIdFromToken(token: string): string | null {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.prestador_id || null;
-    } catch {
-      return null;
-    }
-  }
-
-  async function procesarInvitacion() {
+  async function aceptarInvitacionMagicLink() {
     if (!inviteToken) return;
-    setChecking(false);
-    const prestadorId = getPrestadorIdFromToken(inviteToken);
-    if (!prestadorId) {
-      setError('El enlace de invitación es inválido o está corrupto.');
-      setAceptando(false);
-      return;
-    }
     setAceptando(true);
+    setError(null);
     try {
-      await aceptarInvitacion(prestadorId, inviteToken);
+      const res = await fetch(
+        API_URL + '/api/v1/prestadores/invitaciones/aceptar',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: inviteToken }),
+        },
+      );
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const mensaje =
+          typeof err.detail === 'string'
+            ? err.detail
+            : 'Error al aceptar la invitacion';
+        throw new Error(mensaje);
+      }
+
+      const data = await res.json();
+      guardarJwt(data.access_token);
       router.replace('/admin/dashboard?invite_ok=1');
     } catch (err: any) {
-      setError(err.message || 'Error al aceptar la invitación');
+      setError(err.message);
       setAceptando(false);
     }
   }
 
   useEffect(() => {
     let mounted = true;
+
+    if (inviteToken) {
+      aceptarInvitacionMagicLink();
+      return;
+    }
+
     const token = obtenerJwt();
     if (!token) {
       setChecking(false);
       return;
     }
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000));
-    
-    Promise.race([getMe(), timeout])
+
+    getMe()
       .then(() => {
-        if (!mounted) return;
-        setChecking(false);
-        if (inviteToken) {
-          procesarInvitacion();
-        } else {
-          router.replace('/admin/dashboard');
-        }
+        if (mounted) router.replace('/admin/dashboard');
       })
       .catch(() => {
-        if (!mounted) return;
-        setChecking(false);
+        if (mounted) setChecking(false);
       });
-    return () => { mounted = false; };
+
+    return () => {
+      mounted = false;
+    };
   }, [router, inviteToken]);
 
   async function handleSuccess(_user: AuthUser) {
-    await new Promise((r) => setTimeout(r, 100));
-    if (inviteToken) {
-      await procesarInvitacion();
-    } else {
-      router.replace('/admin/dashboard');
-    }
-  }
-
-  function forzarCerrarSesion() {
-    limpiarJwt();
-    window.location.reload();
+    router.replace('/admin/dashboard');
   }
 
   if (aceptando) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
-          <div className="mb-4 text-3xl">⏳</div>
-          <p className="text-sm text-slate-600">Aceptando invitación...</p>
+          <div className="mb-4 text-3xl">&#9203;</div>
+          <p className="text-sm text-slate-600">Aceptando invitacion...</p>
         </div>
       </div>
     );
   }
 
-  if (checking) {
+  if (checking && !inviteToken) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
-          <div className="mb-4 text-3xl">⏳</div>
-          <p className="text-sm text-slate-600">Verificando sesión...</p>
+          <div className="mb-4 text-3xl">&#9203;</div>
+          <p className="text-sm text-slate-600">Verificando sesion...</p>
         </div>
       </div>
     );
@@ -111,22 +107,27 @@ function AdminLoginContent() {
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow">
         <h1 className="mb-2 text-2xl font-bold text-slate-800">Panel Admin</h1>
         <p className="mb-6 text-sm text-slate-500">
-          {inviteToken 
-            ? 'Iniciá sesión para aceptar la invitación a colaborar.' 
-            : 'Ingresá con tu cuenta de Google para gestionar tus reservas.'}
+          {inviteToken
+            ? 'Procesando tu invitacion...'
+            : 'Ingresa con tu cuenta para gestionar tus reservas.'}
         </p>
+
         {error && (
           <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
             {error}
-            <button 
-              onClick={forzarCerrarSesion} 
+            <button
+              onClick={() => {
+                limpiarJwt();
+                window.location.reload();
+              }}
               className="mt-2 block w-full text-left font-bold underline hover:text-red-800"
             >
-              Cerrar sesión e intentar con otra cuenta
+              Reintentar
             </button>
           </div>
         )}
-        <GoogleLoginButton onSuccess={handleSuccess} />
+
+        {!inviteToken && <GoogleLoginButton onSuccess={handleSuccess} />}
       </div>
     </div>
   );
@@ -134,11 +135,13 @@ function AdminLoginContent() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <p className="text-sm text-slate-600">Cargando...</p>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center text-sm text-slate-600">
+          Cargando...
+        </div>
+      }
+    >
       <AdminLoginContent />
     </Suspense>
   );

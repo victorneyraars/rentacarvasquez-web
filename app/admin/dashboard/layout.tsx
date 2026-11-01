@@ -114,9 +114,11 @@ export default function DashboardLayout({
               </div>
               <div className="text-xs text-slate-500">{user?.email}</div>
             </div>
-            <div className="text-xs font-semibold text-slate-900 sm:hidden">
-              {user?.nombre || user?.email?.split('@')[0]}
-            </div>
+            {!isOwner && (
+              <div className="text-xs font-semibold text-slate-900 sm:hidden">
+                {user?.nombre || user?.email?.split('@')[0]}
+              </div>
+            )}
             <BotonAyuda />
             <button
               onClick={handleLogout}

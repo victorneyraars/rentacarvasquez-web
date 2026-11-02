@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import VehiculoCard from '@/components/VehiculoCard';
 import HeroSearch from '@/components/HeroSearch';
-import { getVehiculosDelPrestador } from '@/lib/api';
+import { getVehiculosDelPrestador, getVehiculosDisponibles } from '@/lib/api';
 
 export const revalidate = 30;
 
@@ -13,8 +13,10 @@ export default async function VehiculosPage({ searchParams }: VehiculosPageProps
   const sp = await searchParams;
   const inicio = typeof sp.inicio === 'string' ? sp.inicio : undefined;
   const fin = typeof sp.fin === 'string' ? sp.fin : undefined;
-  const vehiculos = await getVehiculosDelPrestador();
   const conFechas = Boolean(inicio && fin);
+  const vehiculos = conFechas
+    ? await getVehiculosDisponibles(inicio!, fin!)
+    : await getVehiculosDelPrestador();
 
   return (
     <main className="min-h-screen bg-slate-50">

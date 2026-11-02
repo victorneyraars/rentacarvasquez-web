@@ -141,3 +141,50 @@ export async function reenviarOtpReserva(
   }
   return res.json();
 }
+
+
+// =========================================================
+// Disponibilidad (Fase 1.1)
+// =========================================================
+import type { Disponibilidad } from './types';
+
+/**
+ * Vehiculos disponibles en un rango [desde, hasta) (formato YYYY-MM-DD).
+ * Consume GET /public/rentacar/vehiculos/disponibles.
+ */
+export async function getVehiculosDisponibles(
+  desde: string,
+  hasta: string,
+  opts?: { noCache?: boolean },
+): Promise<Vehiculo[]> {
+  const qs = new URLSearchParams({ desde, hasta });
+  if (PRESTADOR_ID) qs.set('prestador_id', PRESTADOR_ID);
+  const path = `/api/v1/public/rentacar/vehiculos/disponibles?${qs.toString()}`;
+  if (opts?.noCache) {
+    const res = await fetch(`${API_URL}${path}`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}: ${path}`);
+    return res.json() as Promise<Vehiculo[]>;
+  }
+  return fetchJson<Vehiculo[]>(path);
+}
+
+/**
+ * Disponibilidad detallada de un vehiculo en un rango.
+ * Devuelve null si el endpoint falla (para no romper el render).
+ */
+export async function getDisponibilidad(
+  vehiculoId: string,
+  desde: string,
+  hasta: string,
+): Promise<Disponibilidad | null> {
+  try {
+    return await fetchJson<Disponibilidad>(
+      `/api/v1/public/rentacar/vehiculos/${vehiculoId}/disponibilidad?desde=${desde}&hasta=${hasta}`,
+    );
+  } catch {
+    return null;
+  }
+}

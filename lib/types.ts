@@ -127,3 +127,28 @@ export interface PerfilCompleto {
   total_resenas: number;
   verificado: boolean;
 }
+
+
+// =========================================================
+// Disponibilidad (Fase 1.1)
+// =========================================================
+export type TipoBloqueo = "reserva" | "mantenimiento" | "manual";
+
+export interface Bloqueo {
+  id: string;
+  vehiculo_id: string;
+  reserva_id: string | null;
+  fecha_inicio: string; // YYYY-MM-DD
+  fecha_fin: string;    // YYYY-MM-DD
+  tipo: TipoBloqueo;
+  motivo: string | null;
+  created_at: string;
+}
+
+export interface Disponibilidad {
+  vehiculo_id: string;
+  desde: string;
+  hasta: string;
+  disponible: boolean;
+  bloqueos: Bloqueo[];
+}

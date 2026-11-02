@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getVehiculo, PRESTADOR, formatCLP } from "@/lib/api";
+import { getVehiculo, getDisponibilidad, PRESTADOR, formatCLP } from "@/lib/api";
 import { SITE } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 import { buildVehicleSchema, buildBreadcrumbSchema } from "@/lib/json-ld";
 import ReservaForm from "@/components/ReservaForm";
+import DisponibilidadBadge from "@/components/DisponibilidadBadge";
 import { getWhatsAppInfo } from "@/lib/whatsapp-server";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
@@ -52,6 +53,9 @@ export default async function VehiculoDetalle({ params, searchParams }: PageProp
   const vehiculo = await getVehiculo(id);
   if (!vehiculo) notFound();
   const wa = await getWhatsAppInfo();
+  const disponibilidad = (inicio && fin)
+    ? await getDisponibilidad(id, inicio, fin)
+    : null;
 
   const img =
     vehiculo.imagen_url ||
@@ -139,6 +143,11 @@ export default async function VehiculoDetalle({ params, searchParams }: PageProp
 
         <div className="md:col-span-2">
           <div className="md:sticky md:top-6">
+            {disponibilidad && (
+              <div className="mb-4">
+                <DisponibilidadBadge disponibilidad={disponibilidad} desde={inicio} hasta={fin} />
+              </div>
+            )}
             <ReservaForm vehiculo={vehiculo} inicioInicial={inicio} finInicial={fin} />
               <div className="mt-4 rounded-2xl bg-white p-4 text-center shadow-sm">
                 <p className="mb-3 text-sm text-slate-600">Preferis coordinar por WhatsApp?</p>

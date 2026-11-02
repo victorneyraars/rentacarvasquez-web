@@ -76,7 +76,15 @@ export default function ReservaForm({ vehiculo, inicioInicial, finInicial }: Pro
       });
       setReservaCreada({ id: reserva.id, email: email });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al reservar");
+      const msg = err instanceof Error ? err.message : "Error al reservar";
+      // 409 = el backend rechazo por solapamiento con otra reserva/bloqueo
+      if (msg.toLowerCase().includes("ya tiene una reserva") || msg.includes("409")) {
+        setError(
+          "Estas fechas ya no están disponibles. Otra persona reservó este vehículo mientras completabas el formulario. Elegí otras fechas o consultá por WhatsApp."
+        );
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }

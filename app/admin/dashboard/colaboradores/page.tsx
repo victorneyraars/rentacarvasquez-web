@@ -7,9 +7,9 @@ import {
   getColaboradores,
   invitarColaborador,
   eliminarColaborador,
+  actualizarPermisosColaborador,
   type AdminColaborador,
   type MiPrestador,
-  actualizarPermisosColaborador,
 } from '@/lib/admin-api';
 
 // ─────────────────────────────────────────────────────────────
@@ -101,6 +101,19 @@ export default function ColaboradoresPage() {
     const t = setTimeout(() => setMensaje(null), 4000);
     return () => clearTimeout(t);
   }, [mensaje]);
+
+  // ── Guardar permisos del colaborador ──
+  async function handleGuardarPermisos() {
+    if (!editandoPermisos || !prestador) return;
+    try {
+      await actualizarPermisosColaborador(prestador.id, editandoPermisos.email, permisosSeleccionados);
+      setMensaje({ tipo: 'success', texto: 'Permisos actualizados correctamente.' });
+      setEditandoPermisos(null);
+      await cargar();
+    } catch (e: any) {
+      setMensaje({ tipo: 'error', texto: e.message });
+    }
+  }
 
   // ── Eliminar (con optimismo + rollback) ──
   function confirmarEliminar(colab: AdminColaborador) {
@@ -261,6 +274,10 @@ export default function ColaboradoresPage() {
                 onConfirmar={() => confirmarEliminar(c)}
                 onCancelar={() => setConfirmando(null)}
                 onEliminar={handleEliminar}
+                onEditarPermisos={() => {
+                  setEditandoPermisos(c);
+                  setPermisosSeleccionados(c.permisos || []);
+                }}
                 disabled={isPending}
               />
             ))}
@@ -276,6 +293,7 @@ export default function ColaboradoresPage() {
         />
       )}
 
+      {/* Modal de permisos */}
       {editandoPermisos && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
@@ -283,25 +301,20 @@ export default function ColaboradoresPage() {
               Permisos de {editandoPermisos.nombre}
             </h3>
             <div className="space-y-3">
-              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
-                <label key={perm} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={permisosSeleccionados.includes(perm)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
-                      } else {
-                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
-                      }
-                    }}
-                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
-                  />
-                  <span className="text-sm font-medium text-slate-700">
-                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
-                  </span>
-                </label>
-              ))}
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={permisosSeleccionados.includes('gestionar_calendario')}
+                  onChange={(e) => {
+                    if (e.target.checked) setPermisosSeleccionados([...permisosSeleccionados, 'gestionar_calendario']);
+                    else setPermisosSeleccionados(permisosSeleccionados.filter((p: string) => p !== 'gestionar_calendario'));
+                  }}
+                  className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
+                />
+                <span className="text-sm font-medium text-slate-700">
+                  Gestionar Calendario de Disponibilidad
+                </span>
+              </label>
             </div>
             <div className="mt-6 flex justify-end gap-3">
               <button
@@ -333,6 +346,7 @@ function ColaboradorRow({
   onConfirmar,
   onCancelar,
   onEliminar,
+  onEditarPermisos,
   disabled,
 }: {
   colab: AdminColaborador;
@@ -340,6 +354,7 @@ function ColaboradorRow({
   onConfirmar: () => void;
   onCancelar: () => void;
   onEliminar: () => void;
+  onEditarPermisos: () => void;
   disabled: boolean;
 }) {
   const activo = colab.activado_at !== null;
@@ -423,9 +438,20 @@ function ColaboradorRow({
             </button>
           </div>
         ) : (
-          <button
-            onClick={onConfirmar}
-            aria-label={`Eliminar a ${colab.nombre}`}
+          <div className="flex items-center gap-1">
+            {activo && (
+              <button
+                onClick={onEditarPermisos}
+                aria-label={`Editar permisos de ${colab.nombre}`}
+                title="Editar permisos"
+                className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              >
+                ⚙️
+              </button>
+            )}
+            <button
+              onClick={onConfirmar}
+              aria-label={`Eliminar a ${colab.nombre}`}
             className="rounded-md p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
           >
             <svg
@@ -444,7 +470,8 @@ function ColaboradorRow({
               <path d="M10 11v6M14 11v6" />
               <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
             </svg>
-          </button>
+            </button>
+          </div>
         )}
       </div>
     </li>
@@ -474,51 +501,6 @@ function EmptyState({ onInvitar }: { onInvitar: () => void }) {
       >
         Invitar al primer colaborador
       </button>
-
-      {editandoPermisos && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-bold text-slate-900">
-              Permisos de {editandoPermisos.nombre}
-            </h3>
-            <div className="space-y-3">
-              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
-                <label key={perm} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={permisosSeleccionados.includes(perm)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
-                      } else {
-                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
-                      }
-                    }}
-                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
-                  />
-                  <span className="text-sm font-medium text-slate-700">
-                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
-                  </span>
-                </label>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setEditandoPermisos(null)}
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleGuardarPermisos}
-                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -558,51 +540,6 @@ function NotOwnerView({ onVolver }: { onVolver: () => void }) {
           Te redirigimos automáticamente en 5 segundos…
         </p>
       </div>
-
-      {editandoPermisos && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-bold text-slate-900">
-              Permisos de {editandoPermisos.nombre}
-            </h3>
-            <div className="space-y-3">
-              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
-                <label key={perm} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={permisosSeleccionados.includes(perm)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
-                      } else {
-                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
-                      }
-                    }}
-                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
-                  />
-                  <span className="text-sm font-medium text-slate-700">
-                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
-                  </span>
-                </label>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setEditandoPermisos(null)}
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleGuardarPermisos}
-                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -628,51 +565,6 @@ function SkeletonLoader() {
           </div>
         ))}
       </div>
-
-      {editandoPermisos && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-bold text-slate-900">
-              Permisos de {editandoPermisos.nombre}
-            </h3>
-            <div className="space-y-3">
-              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
-                <label key={perm} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={permisosSeleccionados.includes(perm)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
-                      } else {
-                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
-                      }
-                    }}
-                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
-                  />
-                  <span className="text-sm font-medium text-slate-700">
-                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
-                  </span>
-                </label>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setEditandoPermisos(null)}
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleGuardarPermisos}
-                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -834,51 +726,6 @@ function InvitarModal({
           </div>
         </form>
       </div>
-
-      {editandoPermisos && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-bold text-slate-900">
-              Permisos de {editandoPermisos.nombre}
-            </h3>
-            <div className="space-y-3">
-              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
-                <label key={perm} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={permisosSeleccionados.includes(perm)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
-                      } else {
-                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
-                      }
-                    }}
-                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
-                  />
-                  <span className="text-sm font-medium text-slate-700">
-                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
-                  </span>
-                </label>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setEditandoPermisos(null)}
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleGuardarPermisos}
-                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

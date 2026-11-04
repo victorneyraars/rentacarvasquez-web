@@ -190,6 +190,7 @@ export interface AdminColaborador {
   invitado_at: string;
   activado_at: string | null;
   rol: string;
+  permisos?: string[];
 }
 
 export interface InvitarColaboradorPayload {

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import {
   GoogleAuthProvider,
   signInWithPopup,
-  getRedirectResult,
   setPersistence,
   browserLocalPersistence,
   onAuthStateChanged,
@@ -28,28 +27,16 @@ export default function GoogleLoginButton({
   label = 'Continuar con Google',
   className = '',
 }: Props) {
-  useEffect(() => {
-    // Manejar el resultado del redirect (fallback para mobile)
-    getRedirectResult(auth).then((result) => {
-      if (result && result.user) {
-        result.user.getIdToken().then((idToken) => {
-          onSuccess(result.user, idToken); // Asumiendo que onSuccess toma user y token
-        });
-      }
-    }).catch((error) => {
-      console.error("Error en getRedirectResult:", error);
-      setLoading(false);
-    });
-
-    // Asegurar persistencia en mobile
-    setPersistence(auth, browserLocalPersistence).catch(console.error);
-  }, []);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Detecta automáticamente cuando el usuario vuelve de Google
+    // Asegurar persistencia en mobile
+    setPersistence(auth, browserLocalPersistence).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    // Detecta automáticamente cuando el usuario vuelve de Google (Popup)
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setLoading(true);
@@ -79,7 +66,7 @@ export default function GoogleLoginButton({
       await signInWithPopup(auth, provider);
     } catch (err) {
       console.error('[GoogleAuth] Error al iniciar:', err);
-      setError('Error al redirigir a Google');
+      setError('Error al conectar con Google');
       setLoading(false);
     }
   }

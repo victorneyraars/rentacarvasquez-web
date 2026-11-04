@@ -81,16 +81,18 @@ export default function DashboardLayout({
               >
                 Reservas
               </Link>
-              <Link
-                href="/admin/dashboard/calendario"
-                className={`font-semibold transition-colors ${
-                  pathname === '/admin/dashboard/calendario'
-                    ? 'text-brand-600'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Calendario
-              </Link>
+              {(isOwner || user?.permisos?.includes('gestionar_calendario')) && (
+                <Link
+                  href="/admin/dashboard/calendario"
+                  className={`font-semibold transition-colors ${
+                    pathname === '/admin/dashboard/calendario'
+                      ? 'text-brand-600'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Calendario
+                </Link>
+              )}
               {isOwner && (
                 <>
 

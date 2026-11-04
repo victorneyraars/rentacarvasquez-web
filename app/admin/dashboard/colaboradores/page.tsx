@@ -9,6 +9,7 @@ import {
   eliminarColaborador,
   type AdminColaborador,
   type MiPrestador,
+  actualizarPermisosColaborador,
 } from '@/lib/admin-api';
 
 // ─────────────────────────────────────────────────────────────
@@ -58,6 +59,8 @@ export default function ColaboradoresPage() {
 
   // Confirmación de eliminar (inline)
   const [confirmando, setConfirmando] = useState<AdminColaborador | null>(null);
+  const [editandoPermisos, setEditandoPermisos] = useState<AdminColaborador | null>(null);
+  const [permisosSeleccionados, setPermisosSeleccionados] = useState<string[]>([]);
 
   // ── Cargar datos ──
   async function cargar() {
@@ -272,6 +275,51 @@ export default function ColaboradoresPage() {
           onSubmit={handleInvitar}
         />
       )}
+
+      {editandoPermisos && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-bold text-slate-900">
+              Permisos de {editandoPermisos.nombre}
+            </h3>
+            <div className="space-y-3">
+              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
+                <label key={perm} className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={permisosSeleccionados.includes(perm)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
+                      } else {
+                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setEditandoPermisos(null)}
+                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGuardarPermisos}
+                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -426,6 +474,51 @@ function EmptyState({ onInvitar }: { onInvitar: () => void }) {
       >
         Invitar al primer colaborador
       </button>
+
+      {editandoPermisos && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-bold text-slate-900">
+              Permisos de {editandoPermisos.nombre}
+            </h3>
+            <div className="space-y-3">
+              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
+                <label key={perm} className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={permisosSeleccionados.includes(perm)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
+                      } else {
+                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setEditandoPermisos(null)}
+                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGuardarPermisos}
+                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -465,6 +558,51 @@ function NotOwnerView({ onVolver }: { onVolver: () => void }) {
           Te redirigimos automáticamente en 5 segundos…
         </p>
       </div>
+
+      {editandoPermisos && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-bold text-slate-900">
+              Permisos de {editandoPermisos.nombre}
+            </h3>
+            <div className="space-y-3">
+              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
+                <label key={perm} className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={permisosSeleccionados.includes(perm)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
+                      } else {
+                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setEditandoPermisos(null)}
+                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGuardarPermisos}
+                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -490,6 +628,51 @@ function SkeletonLoader() {
           </div>
         ))}
       </div>
+
+      {editandoPermisos && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-bold text-slate-900">
+              Permisos de {editandoPermisos.nombre}
+            </h3>
+            <div className="space-y-3">
+              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
+                <label key={perm} className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={permisosSeleccionados.includes(perm)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
+                      } else {
+                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setEditandoPermisos(null)}
+                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGuardarPermisos}
+                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -651,6 +834,51 @@ function InvitarModal({
           </div>
         </form>
       </div>
+
+      {editandoPermisos && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-bold text-slate-900">
+              Permisos de {editandoPermisos.nombre}
+            </h3>
+            <div className="space-y-3">
+              {['gestionar_calendario', 'gestionar_reservas'].map((perm) => (
+                <label key={perm} className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={permisosSeleccionados.includes(perm)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setPermisosSeleccionados([...permisosSeleccionados, perm]);
+                      } else {
+                        setPermisosSeleccionados(permisosSeleccionados.filter((p) => p !== perm));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    {perm === 'gestionar_calendario' ? 'Gestionar Calendario de Disponibilidad' : 'Gestionar Reservas'}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setEditandoPermisos(null)}
+                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGuardarPermisos}
+                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

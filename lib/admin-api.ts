@@ -11,6 +11,7 @@ export interface AdminUser {
   avatar_url: string | null;
   created_at: string;
   ultimo_login: string | null;
+  permisos?: string[];
 }
 
 export interface AdminReserva {
@@ -365,4 +366,17 @@ export async function eliminarBloqueo(bloqueoId: string): Promise<void> {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || 'Error al eliminar bloqueo');
   }
+}
+
+
+export async function actualizarPermisosColaborador(
+  prestadorId: string,
+  email: string,
+  permisos: string[],
+): Promise<void> {
+  const res = await authFetch(`/api/v1/mis-prestadores/${prestadorId}/colaboradores/${email}/permisos`, {
+    method: 'PATCH',
+    body: JSON.stringify({ permisos }),
+  });
+  if (!res.ok) throw new Error('Error al actualizar permisos');
 }

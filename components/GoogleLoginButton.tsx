@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import {
   GoogleAuthProvider,
-  signInWithRedirect,
+  signInWithPopup,
+  getRedirectResult,
+  setPersistence,
+  browserLocalPersistence,
   onAuthStateChanged,
   signOut,
 } from 'firebase/auth';
@@ -25,6 +28,23 @@ export default function GoogleLoginButton({
   label = 'Continuar con Google',
   className = '',
 }: Props) {
+  useEffect(() => {
+    // Manejar el resultado del redirect (fallback para mobile)
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) {
+        result.user.getIdToken().then((idToken) => {
+          onSuccess(result.user, idToken); // Asumiendo que onSuccess toma user y token
+        });
+      }
+    }).catch((error) => {
+      console.error("Error en getRedirectResult:", error);
+      setLoading(false);
+    });
+
+    // Asegurar persistencia en mobile
+    setPersistence(auth, browserLocalPersistence).catch(console.error);
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +76,7 @@ export default function GoogleLoginButton({
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithRedirect(auth, provider);
+      await signInWithPopup(auth, provider);
     } catch (err) {
       console.error('[GoogleAuth] Error al iniciar:', err);
       setError('Error al redirigir a Google');

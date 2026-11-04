@@ -379,5 +379,8 @@ export async function actualizarPermisosColaborador(
     method: 'PATCH',
     body: JSON.stringify({ permisos }),
   });
-  if (!res.ok) throw new Error('Error al actualizar permisos');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Error al actualizar permisos');
+  }
 }

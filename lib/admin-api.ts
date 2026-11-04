@@ -375,7 +375,7 @@ export async function actualizarPermisosColaborador(
   email: string,
   permisos: string[],
 ): Promise<void> {
-  const res = await authFetch(`/api/v1/mis-prestadores/${prestadorId}/colaboradores/${encodeURIComponent(email)}/permisos`, {
+  const res = await authFetch(`/api/v1/mis-prestadores/${prestadorId}/colaboradores/permisos?email=${encodeURIComponent(email)}`, {
     method: 'PATCH',
     body: JSON.stringify({ permisos }),
   });

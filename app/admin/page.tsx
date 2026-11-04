@@ -16,6 +16,7 @@ function AdminLoginContent() {
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aceptando, setAceptando] = useState(false);
+  const [noAccount, setNoAccount] = useState(false);
 
   async function aceptarInvitacionMagicLink() {
     if (!inviteToken) return;
@@ -32,6 +33,11 @@ function AdminLoginContent() {
       );
 
       if (!res.ok) {
+        if (res.status === 404) {
+          setNoAccount(true);
+          setAceptando(false);
+          return;
+        }
         const err = await res.json().catch(() => ({}));
         const mensaje =
           typeof err.detail === 'string'
@@ -118,7 +124,12 @@ function AdminLoginContent() {
             : 'Ingresa con tu cuenta para gestionar tus reservas.'}
         </p>
 
-        {error && (
+        {noAccount ? (
+          <div className="mb-4 rounded-lg bg-blue-50 p-4 text-sm text-blue-800 border border-blue-100">
+            <p className="font-semibold mb-1">¡Casi listo!</p>
+            <p>No encontramos una cuenta de Baqueano con este email. Podés crearla ahora mismo usando Google.</p>
+          </div>
+        ) : error && (
           <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
             {error}
             <button
@@ -133,14 +144,22 @@ function AdminLoginContent() {
           </div>
         )}
 
-        {(!inviteToken || error) && (
+        {(!inviteToken || error || noAccount) && (
           <div className="mt-6 border-t border-slate-200 pt-6">
             <p className="mb-3 text-sm text-slate-600">
               {inviteToken
-                ? 'Inicia sesión con Google para registrarte y aceptar la invitación:'
+                ? 'Registrate con tu cuenta de Google para aceptar la invitación:'
                 : 'Ingresa con tu cuenta:'}
             </p>
             <GoogleLoginButton onSuccess={handleSuccess} />
+            
+            {inviteToken && (
+              <div className="mt-4 text-center">
+                <p className="text-xs text-slate-500">
+                  También podés descargar la <a href="https://rentacarvasquez.com" className="font-semibold text-brand-600 hover:underline">App de Baqueano</a> y registrarte con este correo.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

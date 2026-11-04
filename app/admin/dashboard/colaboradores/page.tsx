@@ -395,21 +395,28 @@ function ColaboradorRow({
 
       {/* Estado */}
       <div className="mt-2 md:col-span-3 md:mt-0">
-        <span
-          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-            activo
-              ? 'bg-green-100 text-green-800'
-              : 'bg-amber-100 text-amber-800'
-          }`}
-        >
+        <div className="flex flex-wrap items-center gap-2">
           <span
-            className={`h-1.5 w-1.5 rounded-full ${
-              activo ? 'bg-green-500' : 'bg-amber-500'
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+              activo
+                ? 'bg-green-100 text-green-800'
+                : 'bg-amber-100 text-amber-800'
             }`}
-            aria-hidden="true"
-          />
-          {activo ? 'Activo' : 'Pendiente'}
-        </span>
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                activo ? 'bg-green-500' : 'bg-amber-500'
+              }`}
+              aria-hidden="true"
+            />
+            {activo ? 'Activo' : 'Pendiente'}
+          </span>
+          {activo && colab.permisos?.includes('gestionar_calendario') && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">
+              📅 Calendario
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Invitado */}

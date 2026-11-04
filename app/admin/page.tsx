@@ -77,7 +77,13 @@ function AdminLoginContent() {
   }, [router, inviteToken]);
 
   async function handleSuccess(_user: AuthUser) {
-    router.replace('/admin/dashboard');
+    // Si hay una invitación pendiente, el login con Google acaba de crear la
+    // cuenta en el backend. Reintentamos aceptar la invitación con el token.
+    if (inviteToken) {
+      await aceptarInvitacionMagicLink();
+    } else {
+      router.replace('/admin/dashboard');
+    }
   }
 
   if (aceptando) {
@@ -127,7 +133,16 @@ function AdminLoginContent() {
           </div>
         )}
 
-        {!inviteToken && <GoogleLoginButton onSuccess={handleSuccess} />}
+        {(!inviteToken || error) && (
+          <div className="mt-6 border-t border-slate-200 pt-6">
+            <p className="mb-3 text-sm text-slate-600">
+              {inviteToken
+                ? 'Inicia sesión con Google para registrarte y aceptar la invitación:'
+                : 'Ingresa con tu cuenta:'}
+            </p>
+            <GoogleLoginButton onSuccess={handleSuccess} />
+          </div>
+        )}
       </div>
     </div>
   );

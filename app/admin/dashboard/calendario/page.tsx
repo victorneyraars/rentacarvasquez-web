@@ -20,7 +20,7 @@ export default function CalendarioPage() {
     <div>
       <SectionHeader
         title="Calendario de Disponibilidad"
-        subtitle="Gestioná los días bloqueados por reservas, mantenimiento o bloqueos manuales."
+        description="Gestioná los días bloqueados por reservas, mantenimiento o bloqueos manuales."
       />
       {loading ? (
         <p className="text-slate-500">Cargando vehículos...</p>

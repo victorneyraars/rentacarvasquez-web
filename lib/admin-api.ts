@@ -309,3 +309,60 @@ export async function getAuditLog(
   }
   return res.json();
 }
+
+
+// =========================================================
+// BLOQUEOS DE VEHÍCULOS (Calendario de Disponibilidad)
+// =========================================================
+
+export interface AdminBloqueo {
+  id: string;
+  vehiculo_id: string;
+  reserva_id: string | null;
+  fecha_inicio: string;
+  fecha_fin: string;
+  tipo: 'reserva' | 'mantenimiento' | 'manual';
+  motivo: string | null;
+  created_at: string;
+}
+
+export async function getBloqueos(
+  vehiculoId: string,
+  desde?: string,
+  hasta?: string,
+): Promise<AdminBloqueo[]> {
+  let url = `/api/v1/mis-vehiculos-rentacar/${vehiculoId}/bloqueos`;
+  const params = new URLSearchParams();
+  if (desde) params.append('desde', desde);
+  if (hasta) params.append('hasta', hasta);
+  if (params.toString()) url += `?${params.toString()}`;
+
+  const res = await authFetch(url);
+  if (!res.ok) throw new Error('Error al cargar bloqueos');
+  return res.json();
+}
+
+export async function crearBloqueo(
+  vehiculoId: string,
+  payload: { fecha_inicio: string; fecha_fin: string; tipo: string; motivo?: string },
+): Promise<AdminBloqueo> {
+  const res = await authFetch(`/api/v1/mis-vehiculos-rentacar/${vehiculoId}/bloqueos`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Error al crear bloqueo');
+  }
+  return res.json();
+}
+
+export async function eliminarBloqueo(bloqueoId: string): Promise<void> {
+  const res = await authFetch(`/api/v1/mis-vehiculos-rentacar/bloqueos/${bloqueoId}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Error al eliminar bloqueo');
+  }
+}

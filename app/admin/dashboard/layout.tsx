@@ -84,6 +84,16 @@ export default function DashboardLayout({
               {isOwner && (
                 <>
                   <Link
+                    href="/admin/dashboard/calendario"
+                    className={`font-semibold transition-colors ${
+                      pathname === '/admin/dashboard/calendario'
+                        ? 'text-brand-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Calendario
+                  </Link>
+                  <Link
                     href="/admin/dashboard/colaboradores"
                     className={`font-semibold transition-colors ${
                       pathname === '/admin/dashboard/colaboradores'

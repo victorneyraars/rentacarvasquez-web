@@ -94,7 +94,20 @@ export default async function RootLayout({
           ></iframe>
         </noscript>
         {/* End Google Tag Manager (noscript) */}
-{children}</body>
+{children}
+        <div className="mt-8 border-t border-slate-200 pt-8">
+          <div className="grid grid-cols-2 gap-4 text-sm text-slate-600 sm:grid-cols-4">
+            <div>
+              <h3 className="font-bold text-slate-900 mb-3">Destinos</h3>
+              <ul className="space-y-2">
+                <li><a href="/puerto-natales" className="hover:text-green-600">Arriendo en Puerto Natales</a></li>
+                <li><a href="/torres-del-paine" className="hover:text-green-600">Arriendo para Torres del Paine</a></li>
+                <li><a href="/aeropuerto-pnt" className="hover:text-green-600">Arriendo en Aeropuerto PNT</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+</body>
     </html>
   );
 }

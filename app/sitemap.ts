@@ -8,6 +8,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const routes: MetadataRoute.Sitemap = [
     {
+      url: SITE.url + "/puerto-natales",
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: SITE.url + "/torres-del-paine",
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: SITE.url + "/aeropuerto-pnt",
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+
+    {
       url: SITE.url + "/",
       lastModified: now,
       changeFrequency: "daily",

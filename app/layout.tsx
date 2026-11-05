@@ -81,13 +81,13 @@ export default async function RootLayout({
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-P8XT9SDB');`
+            })(window,document,'script','dataLayer','GTM-MWL63KTV');`
           }}
         />
         {/* End Google Tag Manager */}
         <noscript>
           <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-P8XT9SDB"
+            src="https://www.googletagmanager.com/ns.html?id=GTM-MWL63KTV"
             height="0"
             width="0"
             style={{ display: 'none', visibility: 'hidden' }}
